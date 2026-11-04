@@ -100,6 +100,8 @@
   .contact button.toy { color: var(--muted); text-decoration: none; }
   @media (hover: hover) { .contact button.toy:hover { text-decoration: underline; } }
   .contact button.toy:focus-visible { text-decoration: underline; }
+  /* lighter underlines: thin, and half the strength of the text color */
+  a.co:hover, a.co:focus-visible, .contact button.toy:hover, .contact button.toy:focus-visible { text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
   .contact .email { -webkit-user-select: all; user-select: all; color: var(--fg); }
   hr { border: 0; border-top: 1px solid var(--muted); opacity: .4; width: 100%; }
   .fn { font-size: 13px; color: var(--muted); max-width: 30rem; }
