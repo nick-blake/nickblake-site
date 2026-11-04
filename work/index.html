@@ -106,6 +106,10 @@
   #simplereport { --frame: #eef1f6; }
   /* images with their own rounded, see-through corners: a shadow that follows their actual shape */
   .frame > .media.cutout { border-radius: 0; box-shadow: none; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .05)) drop-shadow(0 10px 22px rgba(0, 0, 0, .07)); }
+  /* images and videos fade in softly once they've loaded, instead of popping in (frames stay in place) */
+  .media-fade .frame > .media { opacity: 0; transition: opacity .4s ease; }
+  .media-fade .frame > .media.loaded { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .media-fade .frame > .media { transition: none; } }
   /* stand-in until the real image arrives */
   .ph { color: var(--muted); font-size: 13px; text-align: center; }
 
@@ -237,6 +241,24 @@
 </main>
 
 <script>
+  // Media fade: each image or video fades in when it (or the video's poster frame) has loaded.
+  (() => {
+    const items = [...document.querySelectorAll('.frame > .media')];
+    const done = el => el.classList.add('loaded');
+    for (const el of items) {
+      if (el.tagName === 'IMG') {
+        if (el.complete && el.naturalWidth) done(el);
+        else { el.addEventListener('load', () => done(el), { once: true }); el.addEventListener('error', () => done(el), { once: true }); }
+      } else { // video: show it as soon as the poster frame or the video itself is ready
+        if (el.readyState >= 2) done(el);
+        el.addEventListener('loadeddata', () => done(el), { once: true });
+        if (el.poster) { const img = new Image(); img.onload = img.onerror = () => done(el); img.src = el.poster; }
+        else done(el);
+      }
+    }
+    document.documentElement.classList.add('media-fade'); // only hide media once the script is running
+  })();
+
   // Line-by-line fade: wrap each word, number the lines by where the words land, then fade each block in when it's seen.
   (() => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
