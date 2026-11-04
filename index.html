@@ -91,6 +91,12 @@
   .contact .email { -webkit-user-select: all; user-select: all; color: var(--fg); }
   hr { border: 0; border-top: 1px solid var(--muted); opacity: .4; width: 100%; }
   .fn { font-size: 13px; color: var(--muted); max-width: 30rem; }
+  /* on load the text fades in one line at a time (the script splits words and sets --line) */
+  @media (prefers-reduced-motion: no-preference) {
+    .fading main { opacity: 0; }
+    .fw { opacity: 0; animation: line-in .7s ease forwards; animation-delay: calc(var(--line, 0) * 130ms + 100ms); }
+  }
+  @keyframes line-in { to { opacity: 1; } }
 </style>
 
 <div id="stage">
@@ -255,6 +261,37 @@
 
   // ---- gestures: press the plum
   const main = document.querySelector('main');
+
+  // ---- text fades in line by line: wrap each word, then number the lines by where the words land
+  if (!reduce) {
+    const root = document.documentElement;
+    root.classList.add('fading'); // hidden until the lines are measured
+    document.fonts.ready.then(() => {
+      const words = [];
+      const walk = el => {
+        for (const n of [...el.childNodes]) {
+          if (n.nodeType === 1 && !n.hidden) walk(n);
+          if (n.nodeType !== 3 || !n.textContent.trim()) continue;
+          const frag = document.createDocumentFragment();
+          for (const part of n.textContent.split(/(\s+)/)) {
+            if (!part) continue;
+            if (/^\s+$/.test(part)) { frag.append(part); continue; }
+            const w = document.createElement('span'); w.className = 'fw'; w.textContent = part;
+            frag.append(w); words.push(w);
+          }
+          n.replaceWith(frag);
+        }
+      };
+      walk(main);
+      let line = -1, lastTop = -Infinity;
+      for (const w of words) {
+        const top = w.getBoundingClientRect().top;
+        if (top > lastTop + 4) { line++; lastTop = top; }
+        w.style.setProperty('--line', line);
+      }
+      root.classList.remove('fading');
+    });
+  }
   addEventListener('pointerdown', e => {
     if (e.target.closest('a, button, .email')) return;
     if (e.target === cv) e.preventDefault(); // no loupe, selection or callout while holding the ball
@@ -292,7 +329,7 @@
     const t = ms / 1000;
     hoverAmt += (hover - hoverAmt) * 0.15;
     glow += ((pressing ? 1 : 0.3 * hoverAmt) - glow) * (pressing ? 0.18 : 0.06);
-    if (t > 0.35 && (drop > 0 || dropV > 0)) { // a beat after load so the fall is seen
+    if (t > 0.6 && (drop > 0 || dropV > 0)) { // waits until the ball has faded in, so the fall is seen
       dropV -= 0.007; drop += dropV; // gravity
       if (drop <= 0) {
         // landing: the harder it hits, the more it squashes and jiggles; a hard hit bounces once
@@ -370,8 +407,9 @@
       bctx.stroke();
     }
     // shadow spreads when squished
-    bctx.fillStyle = C.shade;
-    bctx.beginPath(); bctx.ellipse(plum.cx, groundY + 2, r * (0.95 + sq * 1.2) * (1 - Math.min(drop, 1) * 0.4), r * 0.16 * (1 - Math.min(drop, 1) * 0.4), 0, 0, 7); bctx.fill();
+    const appear = reduce ? 1 : clamp((t - 0.1) / 0.45); // the ball (and its shadow) fade in on load
+    bctx.globalAlpha = appear; bctx.fillStyle = C.shade;
+    bctx.beginPath(); bctx.ellipse(plum.cx, groundY + 2, r * (0.95 + sq * 1.2) * (1 - Math.min(drop, 1) * 0.4), r * 0.16 * (1 - Math.min(drop, 1) * 0.4), 0, 0, 7); bctx.fill(); bctx.globalAlpha = 1;
 
     // plum body
     fctx.clearRect(0, 0, W, H);
@@ -406,7 +444,7 @@
     mctx.clearRect(0, 0, W, H);
     mctx.imageSmoothingEnabled = false;
     mctx.drawImage(bgl, 0, 0, bgl.width * PX, bgl.height * PX);
-    mctx.drawImage(fgl, 0, 0, fgl.width * PX, fgl.height * PX);
+    mctx.globalAlpha = appear; mctx.drawImage(fgl, 0, 0, fgl.width * PX, fgl.height * PX); mctx.globalAlpha = 1;
     lcd(mctx, W, H, skyTop);
     requestAnimationFrame(frame);
   }
