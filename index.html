@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nick Blake</title>
+<meta name="description" content="Product designer, based in NYC. Previously at Shake Shack and Skylight.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<style>body{margin:0}</style>
+</head>
+<body>
+<style>
+  /* Layout: one plain text column top-left; a glossy 2005-LCD meadow scene at the bottom with a squishy plum that sings when pressed. */
+  :root {
+    --bg: #f5f5f1; --fg: #2b2620; --muted: #6d6a5e; --link: #8a4b2a;
+    --ink: #3e2c20;
+    --sky: #5aa9e6; --skyHi: #cde8fa; --cloud: #ffffff;
+    --grass1: #6fb83f; --grass2: #3f8a2a; --grassHi: #a6dc6a; --shade: #2f6e20;
+    --plumHi: #bff0ff; --plum: #3fa6e0; --plumLo: #134a8c; --gloss: #ffffff;
+    --leaf: #7cc142; --stem: #7a4a28;
+    --soil: #c99f72; --soil2: #b78b5f; --root: #e8d3b0;
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1b2330; --fg: #ece6da; --muted: #a59f92; --link: #f0b27a; --ink: #0f0b08;
+      --sky: #1d3f6e; --skyHi: #2c4f80; --cloud: #8ea6c6;
+      --grass1: #3f7a2a; --grass2: #24501a; --grassHi: #5c9a3a; --shade: #183a12;
+      --plumHi: #9fe0f6; --plum: #2f8cc8; --plumLo: #0e3466; --gloss: #f3e6ff;
+      --leaf: #6aa83a; --stem: #8a5a34;
+      --soil: #3a2a1d; --soil2: #4a3626; --root: #cdb18a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1b2330; --fg: #ece6da; --muted: #a59f92; --link: #f0b27a; --ink: #0f0b08;
+    --sky: #1d3f6e; --skyHi: #2c4f80; --cloud: #8ea6c6;
+    --grass1: #3f7a2a; --grass2: #24501a; --grassHi: #5c9a3a; --shade: #183a12;
+    --plumHi: #9fe0f6; --plum: #2f8cc8; --plumLo: #0e3466; --gloss: #f3e6ff;
+    --leaf: #6aa83a; --stem: #8a5a34;
+    --soil: #3a2a1d; --soil2: #4a3626; --root: #cdb18a;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: var(--font); font-size: 16px; line-height: 1.6;
+    overflow: hidden; overscroll-behavior: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+  }
+  #stage { position: fixed; inset: 0; background: var(--bg); }
+  #c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  /* only the text area above the plum scrolls */
+  main {
+    position: absolute; z-index: 1; top: 0; left: 0; right: 0; bottom: 45%;
+    overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
+    padding-block: 32px;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  main > * { margin: 0; max-width: 34rem; flex: none; }
+  a { color: var(--link); text-underline-offset: 3px; }
+  sup a { text-decoration: none; font-size: 0.75em; }
+  button.toy {
+    font: inherit; color: var(--link); background: none; border: 0; padding: 0;
+    text-decoration: underline; text-underline-offset: 3px; cursor: pointer; align-self: flex-start;
+  }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 2px; }
+  .faint { color: var(--muted); }
+  .nw { white-space: nowrap; }
+  a.co, span.co { color: var(--fg); text-decoration: none; white-space: nowrap; text-transform: none; }
+  @media (hover: hover) { a.co:hover { text-decoration: underline; text-underline-offset: 3px; } }
+  a.co:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  .logo { display: inline-block; width: 0.95em; height: 0.95em; margin-right: 0.3em; vertical-align: -0.12em; background: currentColor;
+    -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+  .logo.shack { --m: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACIAAAAmCAYAAACh1knUAAABWElEQVR4Xs2YAQ7CIAxFmfEAelkTPYAmXlZvoPlkJQU62Bile8mSZQXaQaEtk9vOnXW5Cd3f87eXINsNlP8ano9z/qkyVVpgkEuhzVeQLbVH22vVogQYkM4AZoUvyxpoRvhYq2YIpEZsVb5EOm4R3riXAZzU10S4EdrwpYoYaQRBxkQ+I35Uhi+TdwOajdXe3JGwRKeOg7bw4J3IKo1dsgbSb+IfBPeT5jjSEnuW+gT/lI70nopKY1lskm1g3UpWastFX+EGSTnJXnm2U1Ml3Gfwri3Pwj7/Q8mBNeVBoXSgkT/A6zXlx9s5rcnx3rMmJNdInmsJ8gh88LMMelFCFqKfASEXOjvn6w3UIjDIHMugZ5UHyaQl52jrskLdcmn8qXqUc8QX8xY1TZazYkZo29auKLTw+nldM9pRAUXdL2YBBjzn35UuXrTgFzpB7yF2DWdkghJd+v0BdCeOHpTBD3cAAAAASUVORK5CYII=); }
+  .logo.skylight { --m: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB0AAAAdCAYAAABWk2cPAAABcklEQVR4XrWVzU0DMRCFHxGHlEArhCI4BCG4kB4QXSClDaJISKECOEEFqYEaOPCjt9qJnN35s0k+yUoU2/PyZjw2kOMc6MYzgM9+/AK78Q3gCcA8E+4kWEShBwAzZd2ZsXfV/35rxT51ROlKE4u4KRaowhMlgqSxRbCE4kz7KOVaelmzDFZ6Na7689AxdMqUHoN1GbQUva+o4TuANwA/yX9IHaZ6hLSC9ckssN4abJeyhazve/WlS0+U8xki8T23hxAUIuE5cx25WGYsFrA33VprfVryWCkoXDv71hS9cBZ8OHPNRE5bRb1+n/BG4vHW+AIwbbZjx+2uQUuURK+Qhxk3Su9do9PypVGJbpIWNs4NtaHTRRC11i1dXnoxpWZeXWtrG8aSmvLFiA7Fa7CGDiPBl2GMqLacpzCHpJxCIpbZP4KBMhtb1/BwqdBFa1BvnykoHEM4xaGEQ4dD/isc3koeteLV7iKkZXhotsWho1Da2R+ON/ddsphRYAAAAABJRU5ErkJggg==); }
+  .who p { margin: 0; }
+  .who { margin-bottom: 1rem; margin-top: 1.5rem; }
+  .prev { margin-top: 1rem; margin-bottom: -6px; }
+  .contact { color: var(--muted); }
+  .contact button.toy { color: var(--muted); text-decoration: none; }
+  @media (hover: hover) { .contact button.toy:hover { text-decoration: underline; } }
+  .contact button.toy:focus-visible { text-decoration: underline; }
+  .contact .email { -webkit-user-select: all; user-select: all; color: var(--fg); }
+  hr { border: 0; border-top: 1px solid var(--muted); opacity: .4; width: 100%; }
+  .fn { font-size: 13px; color: var(--muted); max-width: 30rem; }
+</style>
+
+<div id="stage">
+<canvas id="c" aria-label="A squishy glossy orb sitting in a meadow. Press it to play a note." role="img"></canvas>
+<main>
+  <div class="who">
+    <p>Nick Blake</p>
+    <p class="faint">Product designer, based in NYC</p>
+  </div>
+  <p>I enjoy building and questioning <span class="faint"><span class="nw">human-computer,</span> <span class="nw">audience-stage,</span> <span class="nw">person-policy</span></span> interfaces.</p>
+  <p class="faint">Previously at <a class="co" href="https://shakeshack.com" target="_blank" rel="noopener">Shake Shack</a> and <a class="co" href="https://skylight.digital" target="_blank" rel="noopener">Skylight</a></p>
+  <p>Lately, I'm most interested in tools that help people do meaningful work.</p>
+  <p class="contact" style="margin-top: 1rem"><button class="toy" id="copy" type="button">Copy email</button><span class="email" id="addr" hidden>blakingbread@gmail.com</span></p>
+</main>
+</div>
+
+<script>
+(() => {
+  const R0 = Math.random;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let PX = 4; // art-pixel size; a little finer on phones so the orb reads round and glossy
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+
+  // ---- colors
+  let C = {};
+  const KEYS = ['bg','ink','sky','skyHi','cloud','grass1','grass2','grassHi','shade','plumHi','plum','plumLo','gloss','leaf','stem','soil','soil2','root'];
+  const readColors = () => { const s = getComputedStyle(document.documentElement); for (const k of KEYS) C[k] = s.getPropertyValue('--' + k).trim(); };
+  readColors();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors);
+  new MutationObserver(readColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // ---- canvases: low-res art layers, scaled up with hard pixels
+  const cv = document.getElementById('c'), mctx = cv.getContext('2d');
+  const mk = () => { const c = document.createElement('canvas'); return [c, c.getContext('2d', { willReadFrequently: true })]; };
+  const [bgl, bctx] = mk(), [fgl, fctx] = mk();
+  let W, H, dpr;
+  function resize() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight;
+    PX = W < 600 ? 3 : 4;
+    cv.width = W * dpr; cv.height = H * dpr;
+    for (const [c, x] of [[bgl, bctx], [fgl, fctx]]) { c.width = Math.ceil(W / PX); c.height = Math.ceil(H / PX); x.setTransform(1 / PX, 0, 0, 1 / PX, 0, 0); }
+  }
+  addEventListener('resize', resize); resize();
+
+  function hardEdges(c, cvs) {
+    const im = c.getImageData(0, 0, cvs.width, cvs.height), d = im.data;
+    for (let i = 3; i < d.length; i += 4) d[i] = d[i] > 110 ? 255 : 0;
+    c.putImageData(im, 0, 0);
+  }
+  let gridPat = null, gridDpr = 0, gridPX = 0;
+  function lcd(c, w, h, top) {
+    if (!gridPat || gridDpr !== dpr || gridPX !== PX) {
+      gridPX = PX;
+      const pc = document.createElement('canvas'), n = Math.round(PX * dpr), lw = Math.max(1, Math.round(dpr * 0.75));
+      pc.width = pc.height = n;
+      const p = pc.getContext('2d'); p.fillStyle = 'rgba(0,0,0,0.13)';
+      p.fillRect(n - lw, 0, lw, n); p.fillRect(0, n - lw, n, lw);
+      gridPat = c.createPattern(pc, 'repeat'); gridPat.setTransform(new DOMMatrix().scale(1 / dpr)); gridDpr = dpr;
+    }
+    c.save(); c.globalCompositeOperation = 'source-atop';
+    // the pixel grid fades in gradually so the sky melts into the page instead of starting in a hard line
+    c.fillStyle = gridPat;
+    const fade = (h - top) * 0.45;
+    for (let y = top; y < top + fade; y += PX) { c.globalAlpha = (y - top) / fade; c.fillRect(0, y, w, Math.min(PX, top + fade - y)); } // strips stop exactly where the full grid starts, so nothing doubles up into a line
+    c.globalAlpha = 1; c.fillRect(0, top + fade, w, h - top - fade);
+    const gTop = top + (h - top) * 0.4, gBot = top + (h - top) * 0.75;
+    const gl = c.createLinearGradient(0, gTop, 0, gBot);
+    gl.addColorStop(0, 'rgba(255,255,255,0)'); gl.addColorStop(0.3, 'rgba(255,255,255,0.22)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = gl; c.fillRect(0, gTop, w, gBot - gTop);
+    c.restore();
+  }
+
+  // ---- scenery
+  const clouds = Array.from({ length: 3 }, (_, i) => ({ x: i / 3 + R0() * 0.2, y: 0.15 + R0() * 0.45, s: 0.8 + R0() * 0.6, sp: 0.004 + R0() * 0.004 }));
+  const edgeTufts = Array.from({ length: 40 }, () => ({ x: R0(), h: 0.4 + R0() * 0.6, lean: (R0() - .5) * 2 }));
+  const fieldTufts = Array.from({ length: 34 }, () => ({ x: R0(), y: R0(), h: R0() }));
+
+  // ---- the plum: a ring of springy points around a center
+  const N = 32;
+  const ring = Array.from({ length: N }, () => ({ o: 0, v: 0 }));
+  let sq = 0, sqv = 0, hover = 0, pressing = false, pressAng = -Math.PI / 2, pressDepth = 0;
+  let plum = { cx: 0, cy: 0, r: 40 };
+
+  // ---- sound: a soft two-oscillator voice that holds while pressed
+  let ac = null, voice = null;
+  const SCALE = [196.0, 220.0, 261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25];
+  const idxAt = y => Math.round(clamp((plum.cy + plum.r - y) / (plum.r * 2)) * (SCALE.length - 1));
+  const noteAt = y => { noteIdx = idxAt(y); return SCALE[noteIdx]; };
+  // each note has its own color, low notes cool, high notes warm
+  const HUES = [205, 185, 160, 130, 95, 50, 30, 345, 310, 275];
+  let noteIdx = 4, glow = 0, glowRGB = [63, 166, 224];
+  function hsl(h, s, l) {
+    const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return [f(0), f(8), f(4)].map(v => Math.round(v * 255));
+  }
+  const hexRGB = c => { c = c.replace('#', ''); return [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16)); };
+  const mixRGB = (a, b, k) => 'rgb(' + a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(',') + ')';
+  // iPhones only allow sound that starts inside a touch, and mute web audio with the silent switch
+  // unless the page asks for "playback" audio, so unlock both on the first touch anywhere.
+  let silentEl = null;
+  function unlockAudio() {
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = 'playback';
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state !== 'running') ac.resume();
+      const b = ac.createBuffer(1, 1, 22050), s = ac.createBufferSource();
+      s.buffer = b; s.connect(ac.destination); s.start(0);
+      if (!silentEl) {
+        silentEl = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAAAA');
+        silentEl.loop = true; silentEl.setAttribute('playsinline', '');
+        const p = silentEl.play(); if (p && p.catch) p.catch(() => {});
+      }
+      return true;
+    } catch (e) { return false; }
+  }
+  for (const ev of ['touchstart', 'touchend', 'pointerdown', 'click']) addEventListener(ev, () => { if (!ac || ac.state !== 'running') unlockAudio(); }, { capture: true, passive: true });
+
+  function startVoice(f) {
+    if (!unlockAudio()) return;
+    stopVoice();
+    const g = ac.createGain(), o1 = ac.createOscillator(), o2 = ac.createOscillator(), lp = ac.createBiquadFilter();
+    o1.type = 'sine'; o2.type = 'triangle'; o2.detune.value = 6;
+    lp.type = 'lowpass'; lp.frequency.value = 1800;
+    o1.frequency.value = o2.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.16, ac.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.09, ac.currentTime + 0.3);
+    o1.connect(lp); o2.connect(lp); lp.connect(g).connect(ac.destination);
+    o1.start(); o2.start();
+    voice = { g, o1, o2, f };
+  }
+  function glide(f) { if (!voice || voice.f === f) return; voice.f = f; for (const o of [voice.o1, voice.o2]) o.frequency.setTargetAtTime(f, ac.currentTime, 0.04); }
+  function stopVoice() {
+    if (!voice) return;
+    const v = voice; voice = null; const t = ac.currentTime;
+    v.g.gain.cancelScheduledValues(t); v.g.gain.setValueAtTime(Math.max(0.0001, v.g.gain.value), t);
+    v.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+    v.o1.stop(t + 0.75); v.o2.stop(t + 0.75);
+  }
+
+  function press(x, y) {
+    if (pressing) return; // ignore a second finger while one is already holding
+    pressing = true;
+    pressAng = Math.atan2(y - plum.cy, x - plum.cx);
+    pressDepth = clamp(1 - Math.hypot(x - plum.cx, y - plum.cy) / (plum.r * 1.2), 0.35, 1);
+    try { navigator.vibrate && navigator.vibrate(8); } catch (e) {}
+    startVoice(noteAt(y));
+  }
+  function release() {
+    if (!pressing) return;
+    pressing = false;
+    sqv -= 0.03; // spring back past rest so it jiggles
+    stopVoice();
+  }
+  const onPlum = (x, y) => Math.hypot(x - plum.cx, y - plum.cy) < plum.r * 1.05;
+
+  // ---- gestures: press the plum
+  const main = document.querySelector('main');
+  addEventListener('pointerdown', e => {
+    if (e.target.closest('a, button, .email')) return;
+    if (e.target === cv) e.preventDefault(); // no loupe, selection or callout while holding the orb
+    if (e.target === cv && onPlum(e.clientX, e.clientY)) press(e.clientX, e.clientY);
+  });
+  cv.addEventListener('contextmenu', e => e.preventDefault());
+  cv.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+  addEventListener('pointermove', e => {
+    if (pressing) {
+      // while held, sliding up and down glides between notes and moves the dent with your finger
+      pressAng = Math.atan2(e.clientY - plum.cy, e.clientX - plum.cx);
+      glide(noteAt(e.clientY));
+      return;
+    }
+    if (e.pointerType === 'mouse') {
+      const over = e.target === cv && onPlum(e.clientX, e.clientY);
+      if (over && hover < 0.5) sqv -= 0.02;
+      hover = over ? 1 : 0; cv.style.cursor = over ? 'pointer' : 'default';
+    }
+  });
+  const end = () => release();
+  addEventListener('pointerup', end);
+  addEventListener('pointercancel', end);
+  cv.addEventListener('pointerleave', () => { hover = 0; });
+  const copyBtn = document.getElementById('copy'), addr = document.getElementById('addr');
+  copyBtn.addEventListener('click', () => {
+    const email = addr.textContent, done = label => { copyBtn.textContent = label; setTimeout(() => { copyBtn.textContent = 'Copy email'; }, 1800); };
+    const fallback = () => { addr.hidden = false; const r = document.createRange(); r.selectNodeContents(addr); const s = getSelection(); s.removeAllRanges(); s.addRange(r); done('Select and copy'); };
+    try { navigator.clipboard.writeText(email).then(() => done('Copied'), fallback); } catch (e) { fallback(); }
+  });
+
+  // ---- frame
+  let hoverAmt = 0;
+  function frame(ms) {
+    const t = ms / 1000;
+    hoverAmt += (hover - hoverAmt) * 0.15;
+    glow += ((pressing ? 1 : 0) - glow) * (pressing ? 0.18 : 0.04);
+    const want = hsl(200, 0.75, 0.62 + noteIdx * 0.012);
+    glowRGB = glowRGB.map((v, i) => v + (want[i] - v) * 0.2);
+
+    // physics: squash, dent under the finger, neighbors pull each other smooth
+    const sqTarget = pressing ? 0.1 * pressDepth : -0.015 * hoverAmt;
+    sqv += (sqTarget - sq) * 0.19; sqv *= 0.81; sq += sqv;
+    for (let i = 0; i < N; i++) {
+      const a = i / N * Math.PI * 2;
+      let d = Math.abs(a - ((pressAng + Math.PI * 2) % (Math.PI * 2)));
+      d = Math.min(d, Math.PI * 2 - d);
+      const target = pressing ? -0.12 * pressDepth * Math.exp(-(d * d) / 0.3) : 0;
+      const p = ring[i], l = ring[(i + N - 1) % N], rr = ring[(i + 1) % N];
+      p.v += (target - p.o) * 0.2 + ((l.o + rr.o) / 2 - p.o) * 0.25;
+      p.v *= 0.86;
+    }
+    for (const p of ring) p.o += p.v;
+    if (reduce) { sq = sqTarget; for (const p of ring) { p.o = 0; p.v = 0; } }
+
+    const fieldH = Math.min(96, H * 0.13), groundY = H - fieldH + 12;
+    const r = Math.max(34, Math.min(W, H) * (W < 600 ? 0.135 : 0.12));
+    const breathe = reduce ? 0 : Math.sin(t * 1.8) * 0.018;
+    const sy = 1 - sq - breathe, sx = 1 + sq * 0.85 + breathe * 0.6;
+    plum = { cx: W / 2, cy: groundY - r * sy, r };
+    const textBottom = Math.round(H - (groundY - r * 2.45) + 8) + 'px';
+    if (main.style.bottom !== textBottom) main.style.bottom = textBottom;
+
+    // scenery
+    bctx.clearRect(0, 0, W, H);
+    // the sky begins just below the last line of text, so it never sits behind the words
+    const skyBot = H - fieldH;
+    const textEnd = main.lastElementChild ? main.lastElementChild.getBoundingClientRect().bottom : 0;
+    const skyTop = Math.min(Math.max(H * 0.3, textEnd + 24), skyBot - r * 2.6);
+    let gr = bctx.createLinearGradient(0, skyTop, 0, skyBot);
+    gr.addColorStop(0, C.bg); gr.addColorStop(0.5, C.skyHi); gr.addColorStop(1, C.sky);
+    bctx.fillStyle = gr; bctx.fillRect(0, skyTop, W, skyBot - skyTop + 1);
+    // halo in the note's color
+    if (glow > 0.01) {
+      const hg = bctx.createRadialGradient(plum.cx, plum.cy, r * 0.8, plum.cx, plum.cy, r * 2.6);
+      hg.addColorStop(0, `rgba(${glowRGB.map(Math.round).join(',')},${0.2 * glow})`);
+      hg.addColorStop(1, `rgba(${glowRGB.map(Math.round).join(',')},0)`);
+      bctx.fillStyle = hg; bctx.beginPath(); bctx.arc(plum.cx, plum.cy, r * 2.6, 0, 7); bctx.fill();
+    }
+    bctx.fillStyle = C.cloud;
+    for (const c of clouds) {
+      const x = ((c.x + t * c.sp) % 1.4 - 0.2) * W, y = skyTop + (skyBot - skyTop) * c.y, u = c.s;
+      bctx.beginPath(); bctx.arc(x, y, u * 9, 0, 7); bctx.arc(x + u * 12, y - u * 5, u * 11, 0, 7); bctx.arc(x + u * 26, y, u * 9, 0, 7); bctx.fill();
+      bctx.fillRect(x - u * 6, y - u * 2, u * 38, u * 7);
+    }
+    gr = bctx.createLinearGradient(0, H - fieldH, 0, H);
+    gr.addColorStop(0, C.grassHi); gr.addColorStop(0.35, C.grass1); gr.addColorStop(1, C.grass2);
+    bctx.fillStyle = gr; bctx.fillRect(0, H - fieldH, W, fieldH);
+    bctx.fillStyle = C.grass1;
+    const tq = reduce ? 0 : Math.floor(t * 10) / 10;
+    for (const tf of edgeTufts) {
+      const x = tf.x * W, y = H - fieldH, h = tf.h * 9 + (reduce ? 0 : Math.sin(tq * 2 + tf.x * 20) * 1.5);
+      bctx.beginPath(); bctx.moveTo(x - 5, y + 1); bctx.lineTo(x + tf.lean * 4, y - h); bctx.lineTo(x + 5, y + 1); bctx.fill();
+    }
+    bctx.strokeStyle = C.grass2; bctx.lineWidth = PX;
+    for (const tf of fieldTufts) {
+      const x = tf.x * W, y = H - fieldH + 8 + tf.y * (fieldH - 12), h = 4 + tf.h * 6, w = (reduce ? 0 : Math.sin(tq * 2 + tf.x * 30)) * 1.5;
+      bctx.beginPath();
+      bctx.moveTo(x - 5, y - h * 0.6 + w); bctx.lineTo(x - 1, y);
+      bctx.moveTo(x, y - h + w); bctx.lineTo(x, y);
+      bctx.moveTo(x + 5, y - h * 0.6 + w); bctx.lineTo(x + 1, y);
+      bctx.stroke();
+    }
+    // shadow spreads when squished
+    bctx.fillStyle = C.shade;
+    bctx.beginPath(); bctx.ellipse(plum.cx, groundY + 2, r * (0.95 + sq * 1.2), r * 0.16, 0, 0, 7); bctx.fill();
+
+    // plum body
+    fctx.clearRect(0, 0, W, H);
+    const pts = ring.map((p, i) => {
+      const a = i / N * Math.PI * 2, rad = r * (1 + p.o);
+      return [plum.cx + Math.cos(a) * rad * sx, plum.cy + Math.sin(a) * rad * sy];
+    });
+    const blob = () => {
+      fctx.beginPath();
+      for (let i = 0; i < N; i++) {
+        const [x0, y0] = pts[i], [x1, y1] = pts[(i + 1) % N];
+        const mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
+        if (i === 0) fctx.moveTo(mx, my); else fctx.quadraticCurveTo(x0, y0, mx, my);
+      }
+      const [x0, y0] = pts[0], [x1, y1] = pts[1];
+      fctx.quadraticCurveTo(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2);
+      fctx.closePath();
+    };
+    blob(); fctx.lineJoin = 'round'; fctx.lineWidth = PX * 2.4; fctx.strokeStyle = C.ink; fctx.stroke();
+    const body = fctx.createRadialGradient(plum.cx - r * 0.35 * sx, plum.cy - r * 0.4 * sy, r * 0.1, plum.cx, plum.cy, r * 1.15);
+    const gk = glow * 0.32;
+    body.addColorStop(0, mixRGB(hexRGB(C.plumHi), [255, 255, 255].map((v, i) => (v + glowRGB[i]) / 2), gk));
+    body.addColorStop(0.55, mixRGB(hexRGB(C.plum), glowRGB, gk));
+    body.addColorStop(1, mixRGB(hexRGB(C.plumLo), glowRGB.map(v => v * 0.45), gk));
+    blob(); fctx.fillStyle = body; fctx.fill();
+    // glossy highlight, squishes with the body
+    fctx.fillStyle = C.gloss;
+    fctx.beginPath(); fctx.ellipse(plum.cx - r * 0.34 * sx, plum.cy - r * 0.48 * sy, r * 0.28 * sx, r * 0.15 * sy, -0.6, 0, 7); fctx.fill();
+    fctx.beginPath(); fctx.arc(plum.cx - r * 0.12 * sx, plum.cy - r * 0.62 * sy, PX * 0.9, 0, 7); fctx.fill();
+    hardEdges(fctx, fgl);
+    mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    mctx.clearRect(0, 0, W, H);
+    mctx.imageSmoothingEnabled = false;
+    mctx.drawImage(bgl, 0, 0, bgl.width * PX, bgl.height * PX);
+    mctx.drawImage(fgl, 0, 0, fgl.width * PX, fgl.height * PX);
+    lcd(mctx, W, H, skyTop);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+})();
+</script>
+
+</body></html>
