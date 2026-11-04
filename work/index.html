@@ -73,6 +73,15 @@
   .big, .small { font-size: 16px; line-height: 1.6; }
   .small { color: var(--muted); }
 
+  /* text fades in line by line (the script splits words and numbers the lines): the header and intro on load,
+     each project paragraph when it scrolls into view. Skipped for people who've asked to reduce motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .fade-pending .hero, .fade-pending .project > p { opacity: 0; } /* hidden for a moment while lines are measured */
+    .fade-ready .fw { opacity: 0; }
+    .fade-ready .in .fw { animation: line-in .9s ease forwards; animation-delay: calc(var(--line, 0) * 110ms + 80ms); }
+  }
+  @keyframes line-in { to { opacity: 1; } }
+
   /* every piece of media gets the same frame; the media is fitted inside it without cropping */
   .frame {
     container-type: inline-size; /* lets the media size itself from the frame's width (see below) */
@@ -116,7 +125,6 @@
   <span class="here">Selected work</span>
 </header>
 <section class="intro">
-  <p>Nick Blake</p>
   <p class="faint">Product designer based in NYC</p>
   <p><span class="faint">Previously at</span> <a class="co" href="https://shakeshack.com" target="_blank" rel="noopener" style="color: var(--fg)">Shake Shack</a><span class="faint">,</span> <a class="co" href="https://skylight.digital" target="_blank" rel="noopener" style="color: var(--fg)">Skylight</a></p>
   <p class="faint">blakingbread(at)gmail.com</p>
@@ -229,6 +237,55 @@
 </main>
 
 <script>
+  // Line-by-line fade: wrap each word, number the lines by where the words land, then fade each block in when it's seen.
+  (() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const root = document.documentElement;
+    root.classList.add('fade-pending');
+    const groups = [document.querySelector('.hero'), ...document.querySelectorAll('.project > p')].filter(Boolean);
+    const split = el => {
+      const words = [];
+      const walk = node => {
+        for (const n of [...node.childNodes]) {
+          if (n.nodeType === 1 && !n.hidden) walk(n);
+          if (n.nodeType !== 3 || !n.textContent.trim()) continue;
+          const frag = document.createDocumentFragment();
+          for (const part of n.textContent.split(/(\s+)/)) {
+            if (!part) continue;
+            if (/^\s+$/.test(part)) { frag.append(part); continue; }
+            const w = document.createElement('span'); w.className = 'fw'; w.textContent = part;
+            frag.append(w); words.push(w);
+          }
+          n.replaceWith(frag);
+        }
+      };
+      walk(el);
+      let line = -1, lastTop = -Infinity;
+      for (const w of words) {
+        const top = w.getBoundingClientRect().top;
+        if (top > lastTop + 4) { line++; lastTop = top; }
+        w.style.setProperty('--line', line);
+      }
+    };
+    let done = false;
+    const go = () => {
+      if (done) return; done = true;
+      groups.forEach(split);
+      root.classList.replace('fade-pending', 'fade-ready');
+      const show = g => g.classList.add('in');
+      if (!('IntersectionObserver' in window)) return groups.forEach(show);
+      const io = new IntersectionObserver(entries => {
+        for (const e of entries) if (e.isIntersecting) { show(e.target); io.unobserve(e.target); }
+      }, { rootMargin: '0px 0px -8% 0px' });
+      groups.forEach(g => io.observe(g));
+      // safety net: anything still waiting gets shown once it's on screen, even if an observer event was missed
+      const sweep = () => { for (const g of groups) if (!g.classList.contains('in') && g.getBoundingClientRect().top < innerHeight) show(g); };
+      setInterval(sweep, 1000); sweep();
+    };
+    (document.fonts ? document.fonts.ready : Promise.resolve()).then(go);
+    setTimeout(go, 1500); // don't keep text hidden if fonts are slow
+  })();
+
   // Videos: muted, looping and inline. Ones further down the page only download when they get close to the screen.
   // People who've asked their device to reduce motion get the poster frame with play controls instead of autoplay.
   (() => {
