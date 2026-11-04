@@ -7,7 +7,7 @@
 <meta name="description" content="Product designer, based in NYC. Previously at Shake Shack and Skylight.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap">
 <style>body{margin:0}</style>
 </head>
 <body>
@@ -21,7 +21,7 @@
     --plumHi: #bff0ff; --plum: #3fa6e0; --plumLo: #134a8c; --gloss: #ffffff;
     --leaf: #7cc142; --stem: #7a4a28;
     --soil: #c99f72; --soil2: #b78b5f; --root: #e8d3b0;
-    --font: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --font: "Geist Mono", ui-monospace, Menlo, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -94,7 +94,7 @@
 </style>
 
 <div id="stage">
-<canvas id="c" aria-label="A squishy glossy orb sitting in a meadow. Press it to play a note." role="img"></canvas>
+<canvas id="c" aria-label="A squishy glossy ball sitting in a meadow. Press it to play a note." role="img"></canvas>
 <main>
   <div class="who">
     <p>Nick Blake</p>
@@ -111,7 +111,7 @@
 (() => {
   const R0 = Math.random;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let PX = 4; // art-pixel size; a little finer on phones so the orb reads round and glossy
+  let PX = 4; // art-pixel size; a little finer on phones so the ball reads round and glossy
   const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 
   // ---- colors
@@ -253,7 +253,7 @@
   const main = document.querySelector('main');
   addEventListener('pointerdown', e => {
     if (e.target.closest('a, button, .email')) return;
-    if (e.target === cv) e.preventDefault(); // no loupe, selection or callout while holding the orb
+    if (e.target === cv) e.preventDefault(); // no loupe, selection or callout while holding the ball
     if (e.target === cv && onPlum(e.clientX, e.clientY)) press(e.clientX, e.clientY);
   });
   cv.addEventListener('contextmenu', e => e.preventDefault());
