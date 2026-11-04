@@ -49,8 +49,9 @@
   .project { max-width: 48rem; margin: 0 auto; padding-top: 128px; display: flex; flex-direction: column; gap: 64px; }
   .project + .project { border-top: 1px solid var(--line); margin-top: 128px; }
   .project > p { width: 100%; max-width: 42rem; margin: 0 auto; text-wrap: pretty; }
-  .big { font-size: 20px; line-height: 1.6; }
-  .small { font-size: 17px; line-height: 1.65; color: var(--muted); }
+  /* one text size for both blurbs, matching the header; the first is dark, the second gray */
+  .big, .small { font-size: 16px; line-height: 1.6; }
+  .small { color: var(--muted); }
 
   /* every piece of media gets the same frame; the media is fitted inside it without cropping */
   .frame {
@@ -62,6 +63,14 @@
     display: block; max-width: 100%; max-height: 100%; width: auto; height: auto;
     border-radius: 6px; box-shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 10px 30px rgba(0, 0, 0, .08);
   }
+  /* media that already has its own background fills the frame edge to edge (no second container) */
+  .frame.fill { padding: 0; }
+  .frame.fill > .media { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; border-radius: 0; box-shadow: none; }
+  /* media with its own solid background that shouldn't be cropped: fitted whole, on a frame of the same color */
+  .frame.fit { padding: 0; }
+  .frame.fit > .media { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; border-radius: 0; box-shadow: none; }
+  /* each project can tint its frames to match its own screenshots */
+  #simplereport { --frame: #eef1f6; }
   /* images with their own rounded, see-through corners: a shadow that follows their actual shape */
   .frame > .media.cutout { border-radius: 0; box-shadow: none; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .05)) drop-shadow(0 10px 22px rgba(0, 0, 0, .07)); }
   /* stand-in until the real image arrives */
@@ -70,8 +79,6 @@
   @media (max-width: 700px) {
     .project { padding-top: 80px; gap: 40px; }
     .project + .project { margin-top: 80px; }
-    .big { font-size: 18px; }
-    .small { font-size: 16px; }
     .frame { padding: 5%; border-radius: 10px; }
   }
 </style>
@@ -90,7 +97,7 @@
     <p class="big">SimpleReport is the CDC’s free tool for clinics and testing sites to report rapid test results to public health departments. Our team expanded it beyond COVID-19 to HIV, syphilis and hepatitis C testing.</p>
 
     <!-- hero: loads right away -->
-    <figure class="frame">
+    <figure class="frame fill">
       <video class="media" src="/work/media/simplereport/skeleton.mp4" poster="/work/media/simplereport/skeleton-poster.jpg"
         width="1920" height="1200" autoplay muted loop playsinline preload="auto" aria-label="SimpleReport results page loading"></video>
     </figure>
@@ -98,7 +105,7 @@
     <p class="small">I led design for the result-reporting and facility management workflows, the screens staff use dozens of times a day. Testing for HIV meant asking sensitive follow-up questions without slowing anyone down, so I designed progressive, plain-language forms that appear only when a result requires them. I also built the component system that keeps every flow consistent, accessible and easy to extend to new conditions.</p>
 
     <!-- below the fold: the video only starts downloading when it's about to scroll into view -->
-    <figure class="frame">
+    <figure class="frame fill">
       <video class="media" data-src="/work/media/simplereport/conduct-test.mp4" poster="/work/media/simplereport/conduct-test-poster.jpg"
         width="1920" height="1200" muted loop playsinline preload="none" aria-label="Reporting an HIV test result in SimpleReport"></video>
     </figure>
@@ -113,9 +120,53 @@
         alt="Manage facilities settings for MetroHealth Central Clinic: the facility address card, and a Testing devices list filtered to RSV with one of four devices switched on.">
     </figure>
 
-    <figure class="frame">
+    <figure class="frame fill">
       <img class="media" src="/work/media/simplereport/design-system-anatomy.png" width="3120" height="2040" loading="lazy" decoding="async"
         alt="Design system anatomy: the Report test results screen at the center, surrounded by the components behind it, including navigation, buttons, radio cards, form controls, search, select, multi-select dropdown, chips, status badges, table, list rows, cards, toast, empty state, secondary nav and foundations.">
+    </figure>
+  </article>
+
+  <!-- ===== Shake Shack ===== -->
+  <article class="project" id="shake-shack">
+    <p class="big">Shake Shack is modernizing its technology as it grows, rebuilding how guests order and how teams run each Shack.</p>
+
+    <figure class="frame fill">
+      <img class="media" src="/work/media/shake-shack/kiosk-astor-place.webp" width="1500" height="844" loading="lazy" decoding="async"
+        alt="A customer ordering on a Shake Shack self-service kiosk at the Astor Place restaurant, with burgers on the touchscreen menu.">
+    </figure>
+
+    <p class="small">I designed across Shake Shack’s mobile app, in-store kiosk and internal operations tools, on the Technology team. My work covered guest ordering flows and the staff-facing tools that keep service running smoothly.</p>
+
+    <figure class="frame fit" style="--frame: #000">
+      <video class="media" data-src="/work/media/shake-shack/kiosk-animation.mp4" poster="/work/media/shake-shack/kiosk-animation-poster.jpg"
+        width="1270" height="706" muted loop playsinline preload="none" aria-label="Animated restaurant floor plan showing guests moving to the kiosks and the Order Here counter"></video>
+    </figure>
+
+    <figure class="frame fill">
+      <video class="media" data-src="/work/media/shake-shack/mobile-app.mp4" poster="/work/media/shake-shack/mobile-app-poster.jpg"
+        width="1220" height="686" muted loop playsinline preload="none" aria-label="Ordering a ShackBurger in the Shake Shack app: browsing burgers, choosing a double, adding bacon and customizing toppings"></video>
+    </figure>
+  </article>
+
+  <!-- ===== mayk.it ===== -->
+  <article class="project" id="mayk">
+    <p class="big">The mobile app mayk.it is a simple music studio on your iPhone, used by amateur artists to make songs that go viral on TikTok. Its creators have made hundreds of thousands of songs, with billions of plays across social media.</p>
+
+    <figure class="frame">
+      <img class="media cutout" src="/work/media/mayk/studio-voice-fx.png" width="729" height="1475" loading="lazy" decoding="async"
+        alt="mayk.it studio on iPhone: a recording timeline above a grid of Voice FX presets including nofilter, MagicTune, mayktune, Custom, Pro, Temple, Radio, Harmonizer and Robot.">
+    </figure>
+
+    <p class="small">I joined shortly after they closed a $4 million seed round. I audited the app, interviewed new users and dug into analytics to find where first-time creators were dropping off, then redesigned onboarding to get people to their first song faster.</p>
+
+    <figure class="frame">
+      <img class="media cutout" src="/work/media/mayk/charts.png" width="729" height="1475" loading="lazy" decoding="async"
+        alt="mayk.it Charts on iPhone: weekly rankings of user-made songs with chart movement, listens and comments.">
+    </figure>
+
+    <figure class="frame">
+      <img class="media cutout" src="/work/media/mayk/profile.png" width="729" height="1475" loading="lazy" decoding="async"
+        alt="An artist profile in mayk.it on iPhone: profile photo, bio and stats, a grid of song drops with play counts, and a mini player at the bottom.">
     </figure>
   </article>
 
