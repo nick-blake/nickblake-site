@@ -53,21 +53,31 @@
   .intro {
     width: 100%; max-width: calc(42rem + 40px); margin: auto; /* auto margins center it vertically */
     /* bottom padding matches the header's height (1.5rem + 32px + one line), so it sits in the true middle of the screen */
-    padding: 0 max(20px, env(safe-area-inset-right, 0px)) calc(1.5rem + 32px + 1.6em) max(20px, env(safe-area-inset-left, 0px));
+    padding: 48px max(20px, env(safe-area-inset-right, 0px)) calc(1.5rem + 32px + 1.6em) max(20px, env(safe-area-inset-left, 0px)); /* 48px top: never crowds the header */
     display: flex; flex-direction: column; gap: 14px;
   }
   .intro p { margin: 0; }
+  .footnote cite { font-style: italic; }
+  /* footnote marker: a small raised 1 that doesn't push the line spacing apart */
+  .hero sup { font-size: .7em; line-height: 0; vertical-align: super; }
+  /* footnote at the bottom of the first screen, just above the divider, on the text column */
+  .footnote {
+    width: 100%; max-width: calc(42rem + 40px); margin: 0 auto; font-size: 13px; color: var(--muted);
+    padding: 0 max(20px, env(safe-area-inset-right, 0px)) 24px max(20px, env(safe-area-inset-left, 0px));
+  }
   .intro .faint { color: var(--muted); }
   .intro .nw { white-space: nowrap; }
   .intro a.co { white-space: nowrap; }
   /* the divider sits at the fold, right where the work begins */
-  main > .project:first-of-type { border-top: 1px solid var(--line); padding-top: 64px; }
 
   main { padding: 0 max(20px, env(safe-area-inset-right, 0px)) 160px max(20px, env(safe-area-inset-left, 0px)); }
 
   /* the column: frames are 48rem wide, text a little narrower and centered inside them */
-  .project { max-width: 48rem; margin: 0 auto; padding-top: 128px; display: flex; flex-direction: column; gap: 64px; }
-  .project + .project { border-top: 1px solid var(--line); margin-top: 128px; }
+  .project { max-width: 48rem; margin: 0 auto; display: flex; flex-direction: column; gap: 64px; }
+  /* divider above each project: same width and margins as the text column (the images stay wider) */
+  .project::before { content: ""; display: block; height: 1px; width: 100%; max-width: 42rem; margin: 0 auto; background: var(--line); }
+  .project + .project { margin-top: 128px; }
+  .project + .project::before { margin-bottom: 64px; } /* 64 + the 64px gap = 128px below the line */
   .project > p { width: 100%; max-width: 42rem; margin: 0 auto; text-wrap: pretty; }
   /* one text size for both blurbs, matching the header; the first is dark, the second gray */
   .big, .small { font-size: 16px; line-height: 1.6; }
@@ -114,10 +124,12 @@
   .ph { color: var(--muted); font-size: 13px; text-align: center; }
 
   @media (max-width: 700px) {
-    .project { padding-top: 80px; gap: 40px; }
+    .project { gap: 40px; }
     .project + .project { margin-top: 80px; }
-    main > .project:first-of-type { padding-top: 48px; }
+    .project + .project::before { margin-bottom: 40px; }
+    main > .project:first-of-type::before { margin-bottom: 8px; }
     .frame { padding: 5%; border-radius: 10px; }
+    .intro { padding-bottom: 48px; } /* on phones the long footnote fills the screen, so no extra centering space */
   }
 </style>
 </head>
@@ -130,9 +142,11 @@
 </header>
 <section class="intro">
   <p class="faint">Product designer based in NYC</p>
+  <p>I enjoy building and questioning <span class="faint"><span class="nw">human-computer,</span> <span class="nw">audience-stage,</span> <span class="nw">person-policy</span></span> interfaces<sup>1</sup>.</p>
   <p><span class="faint">Previously at</span> <a class="co" href="https://shakeshack.com" target="_blank" rel="noopener" style="color: var(--fg)">Shake Shack</a><span class="faint">,</span> <a class="co" href="https://skylight.digital" target="_blank" rel="noopener" style="color: var(--fg)">Skylight</a></p>
   <p class="faint">blakingbread(at)gmail.com</p>
 </section>
+<p class="footnote"><sup>1</sup> “systems could no longer be confined to circuits such as those connecting the pilot and the ship, but incorporated all and any of the elements which compose them, and those with which they come into contact: eyes, hands, skin, bones, decks, rails, wheels, rudders, maps, stars, currents, winds, and tides. It encompasses a literally endless list of components working together at an equally endless variety of interlocking and connecting scales. Systems such as these are not merely composed of one or two loops and a governor, but a myriad of interacting components too complex and numerous to name”<br>— Sadie Plant, <cite>Zeros + Ones</cite>, p. 164</p>
 </div>
 
 <main>
