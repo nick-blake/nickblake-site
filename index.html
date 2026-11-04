@@ -173,6 +173,9 @@
   const N = 32;
   const ring = Array.from({ length: N }, () => ({ o: 0, v: 0 }));
   let sq = 0, sqv = 0, hover = 0, pressing = false, pressAng = -Math.PI / 2, pressDepth = 0;
+  // on load the ball drops into the meadow and lands with a squish, showing off how soft it is
+  // (drop = height above the ground in ball radii)
+  let drop = reduce ? 0 : 1.1, dropV = 0;
   let plum = { cx: 0, cy: 0, r: 40 };
 
   // ---- sound: a soft two-oscillator voice that holds while pressed
@@ -244,7 +247,8 @@
   function release() {
     if (!pressing) return;
     pressing = false;
-    sqv -= 0.03; // spring back past rest so it jiggles
+    sqv -= 0.06; // spring back past rest so it jiggles
+    for (let i = 0; i < N; i++) ring[i].v += 0.03 * Math.cos(2 * (i / N * Math.PI * 2 - pressAng)); // and wobbles like jelly
     stopVoice();
   }
   const onPlum = (x, y) => Math.hypot(x - plum.cx, y - plum.cy) < plum.r * 1.05;
@@ -267,7 +271,7 @@
     }
     if (e.pointerType === 'mouse') {
       const over = e.target === cv && onPlum(e.clientX, e.clientY);
-      if (over && hover < 0.5) sqv -= 0.02;
+      if (over && hover < 0.5) { sqv -= 0.035; for (let i = 0; i < N; i++) ring[i].v += 0.012 * Math.cos(2 * (i / N * Math.PI * 2)); }
       hover = over ? 1 : 0; cv.style.cursor = over ? 'pointer' : 'default';
     }
   });
@@ -287,21 +291,32 @@
   function frame(ms) {
     const t = ms / 1000;
     hoverAmt += (hover - hoverAmt) * 0.15;
-    glow += ((pressing ? 1 : 0) - glow) * (pressing ? 0.18 : 0.04);
+    glow += ((pressing ? 1 : 0.3 * hoverAmt) - glow) * (pressing ? 0.18 : 0.06);
+    if (t > 0.35 && (drop > 0 || dropV > 0)) { // a beat after load so the fall is seen
+      dropV -= 0.007; drop += dropV; // gravity
+      if (drop <= 0) {
+        // landing: the harder it hits, the more it squashes and jiggles; a hard hit bounces once
+        const hit = -dropV;
+        drop = 0; dropV = hit > 0.06 ? hit * 0.3 : 0;
+        sqv += hit * 0.5;
+        for (let i = 0; i < N; i++) ring[i].v += hit * 0.18 * Math.cos(2 * (i / N * Math.PI * 2));
+      }
+    }
     const want = hsl(200, 0.75, 0.62 + noteIdx * 0.012);
     glowRGB = glowRGB.map((v, i) => v + (want[i] - v) * 0.2);
 
     // physics: squash, dent under the finger, neighbors pull each other smooth
-    const sqTarget = pressing ? 0.1 * pressDepth : -0.015 * hoverAmt;
+    // stretches a little while falling, like a water balloon
+    const sqTarget = pressing ? 0.14 * pressDepth : -0.025 * hoverAmt - (drop > 0 ? Math.min(0.06, Math.abs(dropV) * 0.35) : 0);
     sqv += (sqTarget - sq) * 0.19; sqv *= 0.81; sq += sqv;
     for (let i = 0; i < N; i++) {
       const a = i / N * Math.PI * 2;
       let d = Math.abs(a - ((pressAng + Math.PI * 2) % (Math.PI * 2)));
       d = Math.min(d, Math.PI * 2 - d);
-      const target = pressing ? -0.12 * pressDepth * Math.exp(-(d * d) / 0.3) : 0;
+      const target = pressing ? -0.17 * pressDepth * Math.exp(-(d * d) / 0.3) : 0;
       const p = ring[i], l = ring[(i + N - 1) % N], rr = ring[(i + 1) % N];
       p.v += (target - p.o) * 0.2 + ((l.o + rr.o) / 2 - p.o) * 0.25;
-      p.v *= 0.86;
+      p.v *= 0.9;
     }
     for (const p of ring) p.o += p.v;
     if (reduce) { sq = sqTarget; for (const p of ring) { p.o = 0; p.v = 0; } }
@@ -310,7 +325,7 @@
     const r = Math.max(34, Math.min(W, H) * (W < 600 ? 0.135 : 0.12));
     const breathe = reduce ? 0 : Math.sin(t * 1.8) * 0.018;
     const sy = 1 - sq - breathe, sx = 1 + sq * 0.85 + breathe * 0.6;
-    plum = { cx: W / 2, cy: groundY - r * sy, r };
+    plum = { cx: W / 2, cy: groundY - r * sy - r * drop, r };
     const textBottom = Math.round(H - (groundY - r * 2.45) + 8) + 'px';
     if (main.style.bottom !== textBottom) main.style.bottom = textBottom;
 
@@ -356,7 +371,7 @@
     }
     // shadow spreads when squished
     bctx.fillStyle = C.shade;
-    bctx.beginPath(); bctx.ellipse(plum.cx, groundY + 2, r * (0.95 + sq * 1.2), r * 0.16, 0, 0, 7); bctx.fill();
+    bctx.beginPath(); bctx.ellipse(plum.cx, groundY + 2, r * (0.95 + sq * 1.2) * (1 - Math.min(drop, 1) * 0.4), r * 0.16 * (1 - Math.min(drop, 1) * 0.4), 0, 0, 7); bctx.fill();
 
     // plum body
     fctx.clearRect(0, 0, W, H);
