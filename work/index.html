@@ -129,6 +129,51 @@
   .media-fade .frame > .media { opacity: 0; transition: opacity .4s ease; }
   .media-fade .frame > .media.loaded { opacity: 1; }
   @media (prefers-reduced-motion: reduce) { .media-fade .frame > .media { transition: none; } }
+  /* email: looks like the text around it, underlines on hover */
+  a.mail { color: inherit; text-decoration: none; }
+  a.mail:hover, a.mail:focus-visible { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
+
+  /* back to top, at the end of the page on the text column */
+  .to-top { max-width: 42rem; margin: 128px auto 0; color: var(--muted); }
+  .to-top a { color: inherit; text-decoration: none; }
+  .to-top a:hover, .to-top a:focus-visible { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
+  @media (max-width: 700px) { .to-top { margin-top: 80px; } }
+
+  /* click to enlarge: frames act as buttons; the enlarged view fills the screen on a soft background */
+  .frame[data-zoom] { cursor: zoom-in; }
+  .frame[data-zoom]:focus-visible { outline: 2px solid var(--link); outline-offset: 4px; }
+  .lightbox {
+    position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+    padding: max(16px, 4vmin); background: color-mix(in srgb, var(--bg) 94%, transparent);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    cursor: zoom-out; opacity: 0; transition: opacity .2s ease;
+  }
+  .lightbox.open { opacity: 1; }
+  .lightbox .lb-media {
+    display: block; width: auto; height: auto; object-fit: contain; border-radius: 6px;
+    /* as big as the screen allows, minus the padding around it */
+    max-width: calc(100vw - 2 * max(16px, 4vmin));
+    max-height: calc(100vh - 2 * max(16px, 4vmin)); max-height: calc(100dvh - 2 * max(16px, 4vmin));
+  }
+  .lightbox .lb-duo { display: flex; gap: max(16px, 3vw); align-items: center; justify-content: center; }
+  .lightbox .lb-duo img {
+    display: block; width: auto; height: auto; object-fit: contain;
+    max-height: calc(100vh - 2 * max(16px, 4vmin)); max-height: calc(100dvh - 2 * max(16px, 4vmin));
+    max-width: calc((100vw - 2 * max(16px, 4vmin) - max(16px, 3vw)) / 2);
+  }
+  .lightbox .lb-close {
+    position: absolute; top: max(16px, env(safe-area-inset-top, 0px)); right: max(20px, env(safe-area-inset-right, 0px));
+    font: inherit; color: var(--muted); background: none; border: 0; padding: 4px; cursor: pointer;
+  }
+  .lightbox .lb-close:hover { color: var(--fg); }
+  .lightbox .lb-close:focus { outline: none; }
+  .lightbox .lb-close:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 2px; }
+  .lb-lock { overflow: hidden; }
+  @media (prefers-reduced-motion: reduce) { .lightbox { transition: none; } }
+
+  /* a pair of phone screens in one frame: less padding, so each phone is as large as the frame allows */
+  .frame.duo { padding: 3% 6%; gap: 4%; }
+  .frame.duo > .media { max-height: 100%; max-height: 68cqw; max-width: 48%; }
   /* stand-in until the real image arrives */
   .ph { color: var(--muted); font-size: 13px; text-align: center; }
 
@@ -143,7 +188,7 @@
   }
 </style>
 </head>
-<body>
+<body id="top">
 
 <div class="hero">
 <header class="site">
@@ -154,7 +199,7 @@
   <p class="faint">Product designer based in NYC</p>
   <p>I enjoy building and questioning <span class="faint"><span class="nw">human-computer,</span> <span class="nw">audience-stage,</span> <span class="nw">person-policy</span></span> interfaces<a class="fn-ref" id="fnref1" href="#fn1" aria-label="Footnote 1"><sup>1</sup></a>.</p>
   <p><span class="faint">Previously at</span> <a class="co" href="https://shakeshack.com" target="_blank" rel="noopener" style="color: var(--fg)">Shake Shack</a><span class="faint">,</span> <a class="co" href="https://skylight.digital" target="_blank" rel="noopener" style="color: var(--fg)">Skylight</a></p>
-  <p class="faint">blakingbread(at)gmail.com</p>
+  <p class="faint"><a class="mail" href="mailto:blakingbread@gmail.com">blakingbread(at)gmail.com</a></p>
 </section>
 <aside class="footnote" id="fn1">
   <p class="fn-note"><span class="fn-mark">1</span>The map is the territory on this one, as interfaces are masks that let us role play and work together.</p>
@@ -234,12 +279,10 @@
 
     <p class="small">I joined shortly after they closed a $4 million seed round. I audited the app, interviewed new users and dug into analytics to find where first-time creators were dropping off, then redesigned onboarding to get people to their first song faster.</p>
 
-    <figure class="frame">
+    <!-- two screens side by side in one frame -->
+    <figure class="frame duo">
       <img class="media cutout" src="/work/media/mayk/charts.png" width="729" height="1475" loading="lazy" decoding="async"
         alt="mayk.it Charts on iPhone: weekly rankings of user-made songs with chart movement, listens and comments.">
-    </figure>
-
-    <figure class="frame">
       <img class="media cutout" src="/work/media/mayk/profile.png" width="729" height="1475" loading="lazy" decoding="async"
         alt="An artist profile in mayk.it on iPhone: profile photo, bio and stats, a grid of song drops with play counts, and a mini player at the bottom.">
     </figure>
@@ -266,6 +309,7 @@
   </article>
   -->
 
+  <p class="to-top"><a href="#top" id="to-top">Back to top ↑</a></p>
 </main>
 
 <script>
@@ -335,6 +379,69 @@
     (document.fonts ? document.fonts.ready : Promise.resolve()).then(go);
     setTimeout(go, 1500); // don't keep text hidden if fonts are slow
   })();
+
+  // Click to enlarge: any image or video opens full screen; click anywhere, press Esc or "Close" to go back.
+  (() => {
+    const frames = [...document.querySelectorAll('.frame')].filter(f => f.querySelector('.media'));
+    let box = null, lastFocus = null;
+    const close = () => {
+      if (!box) return;
+      const b = box; box = null;
+      b.classList.remove('open');
+      document.documentElement.classList.remove('lb-lock');
+      setTimeout(() => b.remove(), 200);
+      if (lastFocus) lastFocus.focus({ preventScroll: true });
+    };
+    const open = frame => {
+      const m = frame.querySelector('.media');
+      lastFocus = document.activeElement;
+      box = document.createElement('div');
+      box.className = 'lightbox';
+      box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'Enlarged view');
+      let big;
+      const all = frame.querySelectorAll('.media');
+      if (all.length > 1) { // e.g. two phone screens: enlarge them together, side by side
+        big = document.createElement('div');
+        big.className = 'lb-duo';
+        for (const el of all) { const i = document.createElement('img'); i.src = el.currentSrc || el.src; i.alt = el.alt || ''; big.append(i); }
+      } else if (m.tagName === 'VIDEO') {
+        big = document.createElement('video');
+        big.src = m.currentSrc || m.src || m.dataset.src; big.poster = m.poster;
+        big.muted = true; big.loop = true; big.autoplay = true; big.playsInline = true;
+        big.setAttribute('muted', ''); big.setAttribute('playsinline', ''); big.setAttribute('disablepictureinpicture', '');
+        if (m.currentTime) big.currentTime = m.currentTime;
+      } else {
+        big = document.createElement('img');
+        big.src = m.currentSrc || m.src; big.alt = m.alt || '';
+      }
+      if (!big.className) big.className = 'lb-media';
+      const btn = document.createElement('button');
+      btn.className = 'lb-close'; btn.type = 'button'; btn.textContent = 'Close';
+      box.append(big, btn);
+      box.addEventListener('click', close);
+      document.body.append(box);
+      document.documentElement.classList.add('lb-lock');
+      requestAnimationFrame(() => box && box.classList.add('open'));
+      if (big.tagName === 'VIDEO') { const p = big.play(); if (p && p.catch) p.catch(() => {}); }
+      btn.focus({ preventScroll: true });
+    };
+    for (const f of frames) {
+      f.dataset.zoom = '';
+      f.tabIndex = 0;
+      f.setAttribute('role', 'button');
+      f.setAttribute('aria-label', 'Enlarge ' + (f.querySelector('.media').tagName === 'VIDEO' ? 'video' : 'image'));
+      f.addEventListener('click', () => open(f));
+      f.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(f); } });
+    }
+    addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  // Back to top: smooth scroll (instant for people who've asked to reduce motion)
+  document.getElementById('to-top').addEventListener('click', e => {
+    e.preventDefault();
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  });
 
   // Videos: muted, looping and inline. Ones further down the page only download when they get close to the screen.
   // People who've asked their device to reduce motion get the poster frame with play controls instead of autoplay.
