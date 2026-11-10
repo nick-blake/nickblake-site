@@ -57,6 +57,14 @@
     display: flex; flex-direction: column; gap: 14px;
   }
   .intro p { margin: 0; }
+  /* circular headshot on the right of the intro, its bottom lined up with the last line */
+  .headshot { display: block; width: 144px; height: 144px; border-radius: 50%; object-fit: cover; }
+  @media (min-width: 701px) {
+    .intro { display: grid; grid-template-columns: 1fr auto; column-gap: 32px; row-gap: 14px; }
+    .intro > p { grid-column: 1; }
+    .intro > .headshot { grid-column: 2; grid-row: 1 / span 4; align-self: end; }
+  }
+  @media (max-width: 700px) { .headshot { width: 112px; height: 112px; order: 99; margin-top: 10px; } } /* phones: below the email */
   .footnote cite { font-style: italic; }
   /* footnote, book style: a rule on top, the number hanging in the left margin, the quote set off by a dashed line */
   .footnote { position: relative; }
@@ -196,6 +204,7 @@
   <span class="here">Selected work</span>
 </header>
 <section class="intro">
+  <img class="headshot" src="/work/media/nick.jpg" width="400" height="400" alt="Nick Blake">
   <p class="faint">Product designer based in NYC</p>
   <p>I enjoy building and questioning <span class="faint"><span class="nw">human-computer,</span> <span class="nw">audience-stage,</span> <span class="nw">person-policy</span></span> interfaces<a class="fn-ref" id="fnref1" href="#fn1" aria-label="Footnote 1"><sup>1</sup></a>.</p>
   <p><span class="faint">Previously at</span> <a class="co" href="https://shakeshack.com" target="_blank" rel="noopener" style="color: var(--fg)">Shake Shack</a><span class="faint">,</span> <a class="co" href="https://skylight.digital" target="_blank" rel="noopener" style="color: var(--fg)">Skylight</a></p>
