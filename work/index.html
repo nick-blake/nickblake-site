@@ -98,7 +98,8 @@
   .project > p { width: 100%; max-width: 42rem; margin: 0 auto; text-wrap: pretty; }
   /* one text size for both blurbs, matching the header; the first is dark, the second gray */
   .big, .small { font-size: 16px; line-height: 1.6; }
-  .small { color: var(--muted); }
+  .big, .small { color: var(--muted); } /* project text is the lighter gray... */
+  .project .m { color: var(--fg); }     /* ...and every metric stands out in the darker text color */
 
   /* text fades in line by line (the script splits words and numbers the lines): the header and intro on load,
      each project paragraph when it scrolls into view. Skipped for people who've asked to reduce motion. */
@@ -235,7 +236,7 @@
         width="1920" height="1200" muted loop playsinline preload="none" aria-label="Reporting an HIV test result in SimpleReport"></video>
     </figure>
 
-    <p class="small">I led design for the result-reporting and facility management workflows, the screens staff use dozens of times a day. Testing for HIV meant asking sensitive follow-up questions without slowing anyone down, so I designed progressive, plain-language forms that appear only when a result requires them.</p>
+    <p class="small">I led design for the result-reporting and facility management workflows, the screens staff use dozens of times a day. Testing for HIV meant asking sensitive follow-up questions without slowing anyone down, so I designed progressive, plain-language forms that appear only when a result requires them. The features I shipped drove <span class="m">15%</span> adoption growth and a <span class="m">42%</span> reduction in onboarding time.</p>
 
     <figure class="frame">
       <img class="media cutout" src="/work/media/simplereport/dashboard-results.png" width="1196" height="757" loading="lazy" decoding="async"
@@ -257,7 +258,7 @@
 
   <!-- ===== Shake Shack ===== -->
   <article class="project" id="shake-shack">
-    <p class="big">Shake Shack is modernizing its technology as it grows, rebuilding how guests order and how teams run each Shack.</p>
+    <p class="big">Shake Shack is modernizing its technology as it grows from <span class="m">650+</span> toward <span class="m">1,500</span> locations, rebuilding how guests order and how teams run each Shack.</p>
 
     <figure class="frame fill">
       <img class="media" src="/work/media/shake-shack/kiosk-astor-place.webp" width="1500" height="844" loading="lazy" decoding="async"
@@ -286,19 +287,19 @@
         width="1440" height="900" muted loop playsinline preload="none" aria-label="Searching documented country events for an asylum case: filtering events in Honduras by location and group, then searching for kidnap"></video>
     </figure>
 
-    <p class="small">I joined as a Civic Digital Fellow through Coding it Forward and turned a basic data capture tool into an integrated case interview system for refugee and asylum officers. Streamlining multi-step data entry cut information lookup time 45%, saved 20 minutes per task and reduced the case backlog 23%.</p>
+    <p class="small">I joined as a Civic Digital Fellow through Coding it Forward and turned a basic data capture tool into an integrated case interview system for refugee and asylum officers. Streamlining multi-step data entry cut information lookup time <span class="m">45%</span>, saved <span class="m">20 minutes</span> per task and reduced the case backlog <span class="m">23%</span>.</p>
   </article>
 
   <!-- ===== mayk.it ===== -->
   <article class="project" id="mayk">
-    <p class="big">The mobile app mayk.it is a simple music studio on your iPhone, used by amateur artists to make songs that go viral on TikTok. Its creators have made hundreds of thousands of songs, with billions of plays across social media.</p>
+    <p class="big">The mobile app mayk.it is a simple music studio on your iPhone, used by amateur artists to make songs that go viral on TikTok. Its creators have made <span class="m">hundreds of thousands</span> of songs, with <span class="m">billions</span> of plays across social media.</p>
 
     <figure class="frame">
       <img class="media cutout" src="/work/media/mayk/studio-voice-fx.png" width="729" height="1475" loading="lazy" decoding="async"
         alt="mayk.it studio on iPhone: a recording timeline above a grid of Voice FX presets including nofilter, MagicTune, mayktune, Custom, Pro, Temple, Radio, Harmonizer and Robot.">
     </figure>
 
-    <p class="small">I joined shortly after they closed a $4 million seed round. I audited the app, interviewed new users and dug into analytics to find where first-time creators were dropping off, then redesigned onboarding to get people to their first song faster.</p>
+    <p class="small">I joined shortly after they closed a <span class="m">$4 million</span> seed round. I audited the app, interviewed new users and dug into analytics to find where first-time creators were dropping off, then redesigned onboarding to get people to their first song faster, boosting song completion <span class="m">35%</span> and Day 1 retention <span class="m">28%</span>.</p>
 
     <!-- two screens side by side in one frame -->
     <figure class="frame duo">
