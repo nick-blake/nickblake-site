@@ -152,6 +152,32 @@ button{font:inherit}
 .fname:empty{display:none}
 .fname,.msg{margin:0;color:var(--muted);overflow-wrap:anywhere}
 .msg{min-height:1.3em;color:var(--fg)}
+
+/* ===== compact phone layout: the whole device fits on one screen (about 650px tall) ===== */
+.kl-short{display:none}
+@media (max-width:520px){
+  body{padding-block:10px 40px}
+  .unit{padding:10px 12px 12px}
+  .strip{margin-bottom:8px;gap:6px 12px}
+  .seg button{min-height:34px;padding:0 10px}
+  .bezel{padding:7px;border-radius:14px}
+  .lcd{border-radius:9px}
+  /* a shorter screen: trims empty sky from the top of the scene (the Moon, dishes and ground all stay) */
+  #lcd{aspect-ratio:160/124;object-fit:cover;object-position:50% 100%}
+  .log{left:8px;right:8px;top:8px;padding:4px 8px 3px;font-size:15px;line-height:1.1}
+  .term{padding:12px 12px;font-size:17px}
+  .ping{margin-top:10px;min-height:38px;font-size:12px}
+  .knobs{margin-top:10px;gap:8px}
+  .kw{gap:5px}
+  .knob{width:48px}
+  .kv{font-size:16px;padding:2px 6px 1px}
+  .kl-full{display:none}
+  .kl-short{display:inline}
+  .player{padding:10px 10px 8px;gap:8px;border-width:12px;border-top-width:0}
+  .player .btn{min-height:36px}
+  .tbtn{min-height:38px;width:46px}
+  .loopt{min-height:38px}
+}
 </style>
 </head>
 <body>
@@ -565,7 +591,7 @@ const ANG = 135;
 const KNOBS = [
   {id:'fb',   label:'Feedback',  def:.25, fmt:pct},
   {id:'dop',  label:'Doppler',   def:.2,  fmt:pct},
-  {id:'dust', label:'Moon Dust', def:.15, fmt:pct},
+  {id:'dust', label:'Moon Dust', short:'Dust', def:.15, fmt:pct},
   {id:'mix',  label:'Mix',       def:.4,  fmt:pct}
 ];
 function knobHTML(k){
@@ -576,7 +602,8 @@ function knobHTML(k){
   }
   return '<div class="kw"><div class="knob" id="k-'+k.id+'" role="slider" tabindex="0" aria-labelledby="kl-'+k.id+'" aria-valuemin="0" aria-valuemax="100">'
     + '<svg class="ticks" viewBox="-40 -40 80 80" aria-hidden="true">'+dots+'</svg><div class="cap"><i></i></div></div>'
-    + '<div class="kl" id="kl-'+k.id+'">'+k.label+'</div><div class="kv" id="kv-'+k.id+'"></div></div>';
+    + '<div class="kl" id="kl-'+k.id+'">'+(k.short ? '<span class="kl-full">'+k.label+'</span><span class="kl-short" aria-hidden="true">'+k.short+'</span>' : k.label)
+    + '</div><div class="kv" id="kv-'+k.id+'"></div></div>';
 }
 function bindKnob(k){
   const el = $('#k-'+k.id), cap = el.querySelector('.cap'), kv = $('#kv-'+k.id);
