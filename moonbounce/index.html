@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moonbounce Echo — Nick Blake</title>
+<meta name="description" content="Moonbounce Echo: an Earth-Moon-Earth delay you can play in the browser.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=VT323&display=swap">
+<style>
+/* Layout: a 1980s space-radio computer. One gray hardware plate holds a near-square CRT monitor (cream pixels on slate), a flat PING MOON plate and four small knobs; transport and notes sit below on near-black. Single committed dark look. */
+:root{
+  color-scheme:dark;
+  --font-px:"Silkscreen","Courier New",ui-monospace,monospace;
+  --font-term:"VT323",ui-monospace,"SF Mono",Menlo,monospace;
+  --bg:#0e0f11; --fg:#e9e3d0; --muted:#9a9686; --line:#2b2d31; --panel:#15171a;
+  --cream:#ece6d2; --ink:#1c1d1f;
+  --plate:#9d998e; --plate-hi:#b6b2a6; --plate-lo:#7a776d;
+  --key-top:#d9d5c8; --key-bot:#b9b5a8; --key-edge:#4d4b45;
+  --scr:#1a1e25; --scr-dim:#3c424d; --cream-shade:#b4af9d;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--fg);
+  font:20px/1.3 var(--font-term);
+  padding-block:28px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-text-size-adjust:100%;
+}
+button{font:inherit}
+.page{max-width:560px;margin:0 auto;display:grid;gap:24px}
+
+/* hardware plate */
+.unit{
+  padding:14px 16px 22px;border-radius:12px;color:var(--ink);
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px),
+    linear-gradient(180deg,var(--plate-hi),var(--plate) 30%,var(--plate-lo));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 0 rgba(0,0,0,.2),0 14px 34px rgba(0,0,0,.55);
+  -webkit-user-select:none;user-select:none;
+}
+.strip{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;margin-bottom:12px}
+.brand{font:700 10px/1.2 var(--font-px);letter-spacing:.14em;text-transform:uppercase}
+.seg{display:flex;border:2px solid var(--ink);border-radius:3px;overflow:hidden}
+.seg button{min-height:40px;padding:0 12px;border:0;background:transparent;color:var(--ink);cursor:pointer;font:700 10px/1 var(--font-px);letter-spacing:.1em;text-transform:uppercase}
+.seg button+button{border-left:2px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--cream)}
+.seg button:focus-visible,.ping:focus-visible,.knob:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+.bezel{padding:10px;border-radius:18px;background:linear-gradient(160deg,var(--plate-lo),var(--plate));
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.35),0 1px 0 rgba(255,255,255,.45)}
+.lcd{position:relative;border-radius:12px;overflow:hidden;background:var(--scr);box-shadow:inset 0 0 0 1px rgba(0,0,0,.7)}
+#lcd{display:block;width:100%;height:auto;image-rendering:crisp-edges;image-rendering:pixelated}
+.lcd::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.16;mix-blend-mode:overlay;
+  background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.lcd::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px),radial-gradient(120% 100% at 50% 40%,transparent 58%,rgba(0,0,0,.42));
+  animation:flick 7s steps(1) infinite}
+@keyframes flick{0%,88%{opacity:1}89%{opacity:.86}90%{opacity:1}95%{opacity:.93}96%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.lcd::after{animation:none}.cur{animation:none}}
+.log{position:absolute;left:12px;right:12px;top:12px;z-index:1;padding:7px 10px 6px;border-radius:7px;background:var(--cream);color:var(--ink);font:19px/1.1 var(--font-term);box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+.log div{white-space:nowrap;overflow:hidden}
+.term{position:absolute;inset:0;z-index:1;padding:20px 16px;background:var(--scr);color:var(--cream);font:22px/1.2 var(--font-term);text-shadow:0 0 6px rgba(236,230,210,.25)}
+.term div{white-space:nowrap;overflow:hidden}
+.term .cur{background:var(--cream)}
+.cur{display:inline-block;width:.5em;height:.8em;margin-left:3px;vertical-align:-1px;background:var(--ink);animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+.ping{display:block;margin:20px auto 0;min-height:46px;padding:0 26px;border:1px solid var(--key-edge);border-radius:3px;cursor:pointer;color:var(--ink);
+  font:700 14px/1 var(--font-px);letter-spacing:.1em;text-transform:uppercase;
+  background:linear-gradient(180deg,var(--key-top),var(--key-bot));
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),0 1px 0 rgba(255,255,255,.45),0 2px 4px rgba(0,0,0,.3)}
+.ping:active,.ping.on{background:linear-gradient(180deg,var(--key-bot),var(--key-top));box-shadow:inset 0 2px 5px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.45)}
+.ping:disabled{cursor:progress}
+
+.knobs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}
+@media (max-width:340px){.knobs{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:20px}}
+.kw{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.knob{position:relative;width:clamp(52px,16vw,66px);aspect-ratio:1;border-radius:50%;touch-action:none;cursor:ns-resize}
+.ticks{position:absolute;left:-14%;top:-14%;width:128%;height:128%;fill:var(--ink);opacity:.65;pointer-events:none}
+.cap{position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 35% 28%,#4b4d50,#1f2123 72%);
+  box-shadow:0 4px 7px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.28),0 0 0 2px #121315}
+.cap i{position:absolute;left:50%;top:9%;width:3px;height:30%;margin-left:-1.5px;background:var(--cream)}
+.kl{font:700 9px/1.25 var(--font-px);letter-spacing:.08em;text-transform:uppercase;text-align:center;overflow-wrap:anywhere}
+.kv{min-width:5ch;padding:3px 7px 2px;border-radius:2px;background:var(--scr);color:var(--cream);font:18px/1 var(--font-term);text-align:center}
+
+/* transport + notes */
+.panel{display:grid;gap:12px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.btn{min-height:44px;padding:0 14px;border:2px solid var(--cream);border-radius:2px;background:transparent;color:var(--cream);cursor:pointer;font:700 11px/1 var(--font-px);letter-spacing:.08em;text-transform:uppercase}
+.btn.solid{background:var(--cream);color:var(--ink)}
+.btn:hover:not(:disabled){background:var(--fg);color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible,.chk input:focus-visible,#seek:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
+.chk{display:flex;align-items:center;gap:8px;min-height:44px;font:700 11px/1 var(--font-px);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:var(--cream)}
+.seekrow{display:flex;align-items:center;gap:12px}
+#seek{flex:1;min-width:0;accent-color:var(--cream);height:32px}
+.time{font:18px/1 var(--font-term);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.fname:empty{display:none}
+.fname,.msg{margin:0;color:var(--muted);overflow-wrap:anywhere}
+.msg{min-height:1.3em;color:var(--fg)}
+</style>
+<style>.back{display:block;max-width:560px;margin:0 auto 12px;padding:0;font:12px/1 "Silkscreen","Courier New",monospace;letter-spacing:.06em;text-transform:uppercase;color:#8d8a7e;text-decoration:none}.back:hover,.back:focus-visible{color:#ece6d2}</style>
+</head>
+<body>
+<a class="back" href="/">&larr; Nick Blake</a>
+<main class="page">
+  <h1 class="sr">Moonbounce Echo</h1>
+
+  <section class="unit" aria-label="Moonbounce Echo">
+    <div class="strip">
+      <div class="brand">Earth &middot; Moon &middot; Earth</div>
+      <div class="seg" role="group" aria-label="Listen to">
+        <button id="abOrig" type="button" aria-pressed="false">Original</button>
+        <button id="abEcho" type="button" aria-pressed="true">Moon Echo</button>
+      </div>
+    </div>
+    <div class="bezel">
+      <div class="lcd">
+        <canvas id="lcd" width="160" height="150" role="img" aria-label="Pixel monitor: two radio dishes aim at the Moon above a small horizon"></canvas>
+        <div class="log" id="log"></div>
+        <div class="term" id="term" hidden></div>
+      </div>
+    </div>
+    <button class="ping" id="ping" type="button">Ping Moon</button>
+    <div class="knobs" id="knobs"></div>
+  </section>
+
+  <section class="panel" aria-label="Transport">
+    <div class="row">
+      <button class="btn solid" id="loadBtn" type="button">Load audio</button>
+      <button class="btn" id="demoBtn" type="button">Demo sound</button>
+      <input id="file" type="file" accept="audio/*,.wav,.mp3,.aif,.aiff,.m4a,.ogg,.flac" hidden>
+    </div>
+    <p class="fname" id="fname"></p>
+    <div class="row">
+      <button class="btn" id="playBtn" type="button" disabled>Play</button>
+      <button class="btn" id="stopBtn" type="button" disabled>Stop</button>
+      <label class="chk"><input type="checkbox" id="loop"> Loop</label>
+    </div>
+    <div class="seekrow">
+      <input type="range" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek" disabled>
+      <span class="time" id="time">0:00 / 0:00</span>
+    </div>
+    <div class="row"><button class="btn" id="exportBtn" type="button" disabled>Export WAV</button></div>
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+  </section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rad = Math.PI/180, C_KM_S = 299792.458, AU_KM = 149597870.7;
+const MEAN_KM = 384400, MEAN_T = 2*MEAN_KM/C_KM_S;
+const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function rng(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a>>>15, 1 | a); t = t + Math.imul(t ^ t>>>7, 61 | t) ^ t; return ((t ^ t>>>14)>>>0)/4294967296; }; }
+
+/* ---------- astronomy (fallback ephemeris + phase) ---------- */
+const TERMS = [[0,0,1,-20905355],[2,0,-1,-3699111],[2,0,0,-2955968],[0,0,2,-569925],[0,1,0,48888],
+  [2,0,-2,246158],[2,-1,-1,-152138],[2,0,1,-170733],[2,-1,0,-204586],[0,1,-1,-129620],[1,0,0,104755],[0,1,1,10321]];
+function jdOf(date){ return date.getTime()/86400000 + 2440587.5; }
+function lunarDistanceKm(date){
+  const T = (jdOf(date)-2451545)/36525;
+  const D = (297.8501921 + 445267.1114034*T)*rad;
+  const M = (357.5291092 + 35999.0502909*T)*rad;
+  const Mp = (134.9633964 + 477198.8675055*T)*rad;
+  const E = 1 - 0.002516*T;
+  let s = 385000.56;
+  for (const [d,m,mp,c] of TERMS) s += (Math.abs(m)===1 ? E : 1) * c * Math.cos(d*D + m*M + mp*Mp) / 1000;
+  return s;
+}
+async function fetchJPL(signal){
+  const now = new Date(), stop = new Date(now.getTime()+60000);
+  const f = d => encodeURIComponent(d.toISOString().slice(0,16).replace('T',' '));
+  const url = 'https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27500@399%27'
+    + '&START_TIME=%27' + f(now) + '%27&STOP_TIME=%27' + f(stop) + '%27&STEP_SIZE=%271m%27&QUANTITIES=%2720%27';
+  const res = await fetch(url, {signal});
+  if (!res.ok) throw new Error('http ' + res.status);
+  const j = await res.json();
+  const txt = String(j.result || '');
+  const a = txt.indexOf('$$SOE'), b = txt.indexOf('$$EOE');
+  if (a < 0 || b < 0) throw new Error('no data');
+  const line = txt.slice(a+5, b).trim().split('\n')[0];
+  const nums = line.trim().split(/\s+/).map(Number).filter(x => isFinite(x));
+  const delta = nums[nums.length-2];
+  const km = delta*AU_KM;
+  if (!(km > 340000 && km < 410000)) throw new Error('bad range');
+  return km;
+}
+async function getRange(){
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), 4000);
+  try { const km = await fetchJPL(ac.signal); return {km, source:'JPL HORIZONS LIVE'}; }
+  catch (e){ return {km:lunarDistanceKm(new Date()), source:'CALC (OFFLINE)'}; }
+  finally { clearTimeout(timer); }
+}
+
+/* ---------- state ---------- */
+const state = { fb:.35, dop:.3, dust:.25, mix:.5, echoOn:true, T:MEAN_T };
+const meta = { km:MEAN_KM, delta:0, source:'DEFAULT MEAN' };
+const pct = v => Math.round(v*100)+'%';
+
+/* <pure> */
+const CRC = (() => { const t = new Uint32Array(256); for (let n=0;n<256;n++){ let c = n; for (let k=0;k<8;k++) c = c&1 ? 0xEDB88320 ^ (c>>>1) : c>>>1; t[n] = c>>>0; } return t; })();
+function crc32(b){ let c = -1; for (let i=0;i<b.length;i++) c = (c>>>8) ^ CRC[(c ^ b[i]) & 255]; return (c ^ -1)>>>0; }
+function zipStore(name, data){
+  const nm = new TextEncoder().encode(name), n = data.length, crc = crc32(data);
+  const lh = new DataView(new ArrayBuffer(30));
+  lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true); lh.setUint16(8,0,true);
+  lh.setUint16(10,0,true); lh.setUint16(12,0x21,true); lh.setUint32(14,crc,true); lh.setUint32(18,n,true);
+  lh.setUint32(22,n,true); lh.setUint16(26,nm.length,true); lh.setUint16(28,0,true);
+  const cd = new DataView(new ArrayBuffer(46));
+  cd.setUint32(0,0x02014b50,true); cd.setUint16(4,20,true); cd.setUint16(6,20,true); cd.setUint16(8,0x0800,true);
+  cd.setUint16(10,0,true); cd.setUint16(12,0,true); cd.setUint16(14,0x21,true); cd.setUint32(16,crc,true);
+  cd.setUint32(20,n,true); cd.setUint32(24,n,true); cd.setUint16(28,nm.length,true); cd.setUint32(42,0,true);
+  const eo = new DataView(new ArrayBuffer(22));
+  eo.setUint32(0,0x06054b50,true); eo.setUint16(8,1,true); eo.setUint16(10,1,true);
+  eo.setUint32(12,46+nm.length,true); eo.setUint32(16,30+nm.length+n,true);
+  return new Blob([lh, nm, data, cd, nm, eo], {type:'application/zip'});
+}
+function encodeWav(ab){
+  const nCh = ab.numberOfChannels, n = ab.length, sr = ab.sampleRate, bytes = n*nCh*2;
+  const buf = new ArrayBuffer(44+bytes), v = new DataView(buf);
+  const w = (o,s) => { for (let i=0;i<s.length;i++) v.setUint8(o+i, s.charCodeAt(i)); };
+  w(0,'RIFF'); v.setUint32(4,36+bytes,true); w(8,'WAVE'); w(12,'fmt '); v.setUint32(16,16,true);
+  v.setUint16(20,1,true); v.setUint16(22,nCh,true); v.setUint32(24,sr,true); v.setUint32(28,sr*nCh*2,true);
+  v.setUint16(32,nCh*2,true); v.setUint16(34,16,true); w(36,'data'); v.setUint32(40,bytes,true);
+  const ch = []; for (let c=0;c<nCh;c++) ch.push(ab.getChannelData(c));
+  let o = 44;
+  for (let i=0;i<n;i++) for (let c=0;c<nCh;c++){ const x = Math.max(-1, Math.min(1, ch[c][i])); v.setInt16(o, x<0 ? x*32768 : x*32767, true); o += 2; }
+  return new Uint8Array(buf);
+}
+/* </pure> */
+
+/* ---------- audio engine ---------- */
+function makeCurve(fn){ const n = 2049, c = new Float32Array(n); for (let i=0;i<n;i++) c[i] = fn(i/(n-1)*2-1); return c; }
+const SAT = makeCurve(x => Math.tanh(1.3*x)/Math.tanh(1.3));
+const ABS = makeCurve(x => Math.abs(x));
+
+function buildGraph(c){
+  const n = {};
+  n.input = c.createGain();
+  n.dry = c.createGain();
+  n.delay = c.createDelay(4); n.delay.delayTime.value = state.T;
+  n.hp = c.createBiquadFilter(); n.hp.type = 'highpass';
+  n.lp = c.createBiquadFilter(); n.lp.type = 'lowpass'; n.lp.Q.value = .7;
+  n.sat = c.createWaveShaper(); n.sat.curve = SAT; n.sat.oversample = '2x';
+  n.vib = c.createDelay(.1); n.vib.delayTime.value = .025;
+  n.fade = c.createGain(); n.fade.gain.value = 1;
+  n.fb = c.createGain();
+  n.wet = c.createGain();
+  n.master = c.createGain(); n.master.gain.value = .85;
+  n.comp = c.createDynamicsCompressor(); n.comp.threshold.value = -14; n.comp.ratio.value = 4;
+  /* Doppler: a drifting delay on the return path. Libration fading: slow random gain dips. */
+  n.dopSrc = c.createConstantSource(); n.dopSrc.offset.value = 0;
+  n.dopDepth = c.createGain(); n.dopSrc.connect(n.dopDepth); n.dopDepth.connect(n.vib.delayTime);
+  n.fadeSrc = c.createConstantSource(); n.fadeSrc.offset.value = 0;
+  n.fadeDepth = c.createGain(); n.fadeSrc.connect(n.fadeDepth); n.fadeDepth.connect(n.fade.gain);
+  /* Moon Dust: swept band-passed noise whose level follows the returning signal. */
+  const nb = c.createBuffer(1, Math.floor(c.sampleRate*2), c.sampleRate);
+  const d = nb.getChannelData(0); for (let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+  n.noise = c.createBufferSource(); n.noise.buffer = nb; n.noise.loop = true;
+  n.nbp = c.createBiquadFilter(); n.nbp.type = 'bandpass'; n.nbp.frequency.value = 1800; n.nbp.Q.value = .7;
+  n.nlfo = c.createOscillator(); n.nlfo.frequency.value = .13;
+  n.nlfoG = c.createGain(); n.nlfoG.gain.value = 900; n.nlfo.connect(n.nlfoG); n.nlfoG.connect(n.nbp.frequency);
+  n.nvca = c.createGain(); n.nvca.gain.value = 0;
+  n.env = c.createWaveShaper(); n.env.curve = ABS;
+  n.envLP = c.createBiquadFilter(); n.envLP.type = 'lowpass'; n.envLP.frequency.value = 14;
+  n.envG = c.createGain();
+  n.noise.connect(n.nbp); n.nbp.connect(n.nvca); n.nvca.connect(n.wet);
+  /* routing */
+  n.input.connect(n.dry); n.dry.connect(n.master);
+  n.input.connect(n.delay);
+  n.delay.connect(n.hp); n.hp.connect(n.lp); n.lp.connect(n.sat); n.sat.connect(n.vib); n.vib.connect(n.fade);
+  n.fade.connect(n.wet); n.wet.connect(n.master);
+  n.fade.connect(n.fb); n.fb.connect(n.delay);
+  n.fade.connect(n.env); n.env.connect(n.envLP); n.envLP.connect(n.envG); n.envG.connect(n.nvca.gain);
+  n.master.connect(n.comp); n.comp.connect(c.destination);
+  n.dopSrc.start(); n.fadeSrc.start(); n.noise.start(); n.nlfo.start();
+  return n;
+}
+function applyTo(n, c, p, imm){
+  const t = c.currentTime, k = imm ? 0 : .04;
+  const set = (a, v) => k ? a.setTargetAtTime(v, t, k) : (a.value = v);
+  const d = p.dust;
+  set(n.fb.gain, p.fb*.88);
+  set(n.hp.frequency, 90 + d*350);
+  set(n.lp.frequency, 9000 - d*6500);
+  set(n.dopDepth.gain, p.dop*.012);
+  set(n.fadeDepth.gain, p.dop*.35);
+  set(n.nvca.gain, d*d*.02);
+  set(n.envG.gain, d*.45);
+  const a = p.mix*Math.PI/2;
+  set(n.dry.gain, p.echoOn ? Math.cos(a) : 1);
+  set(n.wet.gain, p.echoOn ? Math.sin(a)*1.1 : 0);
+}
+function scheduleDrift(n, t0, t1, seed){
+  const r = rng(seed), r2 = rng(seed+99);
+  for (let t=t0; t<t1; t+=.45) n.dopSrc.offset.setTargetAtTime(r()*2-1, t, .25);
+  for (let t=t0; t<t1; t+=.2) n.fadeSrc.offset.setTargetAtTime(-r2(), t, .1);
+}
+let ctx = null, nodes = null, driftTo = 0;
+function topUpDrift(){
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  if (driftTo < now + 6){ scheduleDrift(nodes, Math.max(driftTo, now), now + 16, (Math.random()*1e9)|0); driftTo = now + 16; }
+}
+function ensureAudio(){
+  if (ctx){ if (ctx.state === 'suspended') ctx.resume(); return true; }
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC){ msg('This browser has no Web Audio support.'); return false; }
+  ctx = new AC();
+  nodes = buildGraph(ctx);
+  applyTo(nodes, ctx, state, true);
+  topUpDrift();
+  return true;
+}
+function applyLive(){ if (nodes) applyTo(nodes, ctx, state, false); pending = null; resetExportBtn(); }
+
+function bell(c, f, t, dest, vel){
+  const car = c.createOscillator(), mod = c.createOscillator(), mg = c.createGain(), g = c.createGain();
+  car.type = 'sine'; mod.type = 'sine'; car.frequency.value = f; mod.frequency.value = f*2.76;
+  mg.gain.setValueAtTime(f*1.6, t); mg.gain.exponentialRampToValueAtTime(.01, t+.5);
+  mod.connect(mg); mg.connect(car.frequency);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel, t+.006); g.gain.exponentialRampToValueAtTime(.0008, t+2.2);
+  car.connect(g); g.connect(dest);
+  car.start(t); mod.start(t); car.stop(t+2.3); mod.stop(t+2.3);
+}
+function pad(c, freqs, t, dur, dest){
+  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400; lp.connect(dest);
+  freqs.forEach(f => [-4, 4].forEach(det => {
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = 'triangle'; o.frequency.value = f; o.detune.value = det;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.035, t+.5);
+    g.gain.linearRampToValueAtTime(.035, t+dur-1); g.gain.linearRampToValueAtTime(0, t+dur);
+    o.connect(g); g.connect(lp); o.start(t); o.stop(t+dur+.05);
+  }));
+}
+async function makeDemo(){
+  const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const sr = (ctx && ctx.sampleRate) || 44100;
+  const oc = new OC(1, Math.ceil(sr*5), sr);
+  const out = oc.createGain(); out.gain.value = .8; out.connect(oc.destination);
+  pad(oc, [130.81, 196, 261.63, 329.63, 493.88], 0, 3.4, out);
+  [[659.25,.1],[783.99,.4],[987.77,.7],[1174.66,1.05],[987.77,1.5],[783.99,1.85],[659.25,2.25]]
+    .forEach(n => bell(oc, n[0], n[1], out, .22));
+  return oc.startRendering();
+}
+function blip(){
+  const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(1320, t); o.frequency.exponentialRampToValueAtTime(880, t+.18);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.5, t+.01); g.gain.exponentialRampToValueAtTime(.001, t+.4);
+  o.connect(g); g.connect(nodes.input); o.start(t); o.stop(t+.45);
+}
+
+/* ---------- transport ---------- */
+let fileBuf = null, src = null, playing = false, offset = 0, baseOff = 0, startedAt = 0, loop = false, seeking = false;
+const fmtT = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); };
+function pos(){
+  if (!playing) return offset;
+  let p = baseOff + (ctx.currentTime - startedAt);
+  if (loop && fileBuf) p %= fileBuf.duration;
+  return fileBuf ? Math.min(p, fileBuf.duration) : 0;
+}
+function stopSrc(){ playing = false; if (src){ const s = src; src = null; s.onended = null; try { s.stop(); } catch(e){} } }
+function play(quiet){
+  if (!fileBuf || playing) return;
+  if (!ensureAudio()) return;
+  if (offset >= fileBuf.duration - .02) offset = 0;
+  const s = ctx.createBufferSource();
+  s.buffer = fileBuf; s.loop = loop; s.connect(nodes.input);
+  s.onended = () => { if (src === s){ src = null; playing = false; offset = 0; ui(); } };
+  s.start(0, offset);
+  src = s; baseOff = offset; startedAt = ctx.currentTime; playing = true;
+  if (!quiet) transmit();
+  ui();
+}
+function pause(){ if (!playing) return; offset = pos(); stopSrc(); ui(); }
+function ui(){
+  const has = !!fileBuf;
+  $('#playBtn').disabled = !has; $('#stopBtn').disabled = !has; $('#seek').disabled = !has;
+  $('#exportBtn').disabled = !has && !pending;
+  $('#playBtn').textContent = playing ? 'Pause' : 'Play';
+  const dur = has ? fileBuf.duration : 0, p = has ? pos() : 0;
+  $('#time').textContent = fmtT(p) + ' / ' + fmtT(dur);
+  if (!seeking) $('#seek').value = dur ? Math.round(p/dur*1000) : 0;
+}
+function setFile(buf, name){
+  stopSrc(); fileBuf = buf; offset = 0; pending = null; resetExportBtn();
+  $('#fname').textContent = name + ' (' + buf.duration.toFixed(1) + ' s)';
+  msg(''); ui();
+}
+function msg(t){ $('#msg').textContent = t; }
+
+/* ---------- monitor readout ---------- */
+const pillEl = $('#log'), termEl = $('#term');
+let pinging = false;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const fmtDelta = d => (d < 0 ? '-' : '') + Math.abs(d).toFixed(14);
+function renderPill(){
+  pillEl.textContent = '';
+  ['> delta: ' + fmtDelta(meta.delta), '> time: ' + state.T.toFixed(5) + ' sec', '> src: ' + meta.source.toLowerCase()].forEach(r => {
+    const d = document.createElement('div'); d.textContent = r; pillEl.appendChild(d);
+  });
+}
+function termLine(){ const d = document.createElement('div'); termEl.appendChild(d); return d; }
+function moveCursor(line){
+  let c = termEl.querySelector('.cur');
+  if (!c){ c = document.createElement('i'); c.className = 'cur'; }
+  line.appendChild(c);
+}
+async function typeLine(text){
+  const line = termLine(), t = document.createTextNode('');
+  line.appendChild(t); moveCursor(line);
+  for (const ch of text){ t.data += ch; await sleep(reduced ? 0 : 22); }
+}
+async function ping(){
+  if (pinging) return;
+  pinging = true;
+  const btn = $('#ping'); btn.disabled = true; btn.classList.add('on');
+  ensureAudio();
+  const rp = getRange();
+  termEl.textContent = ''; termEl.hidden = false; pillEl.hidden = true;
+  await typeLine('> pinging the moon...');
+  await sleep(reduced ? 0 : 350);
+  await typeLine('> getting ephemeris...');
+  const r = await rp;
+  const T = 2*r.km/C_KM_S;
+  meta.delta = T - state.T; meta.km = r.km; meta.source = r.source; state.T = T;
+  if (nodes) nodes.delay.delayTime.setTargetAtTime(T, ctx.currentTime, .25);
+  pending = null; resetExportBtn();
+  await typeLine('> src: ' + r.source.toLowerCase());
+  await typeLine('> delta: ' + fmtDelta(meta.delta));
+  await typeLine('> time: ' + T.toFixed(5) + ' sec');
+  const last = termLine(); last.appendChild(document.createTextNode('> ')); moveCursor(last);
+  await sleep(reduced ? 300 : 1000);
+  renderPill(); termEl.hidden = true; pillEl.hidden = false;
+  if (nodes && !playing) blip();
+  transmit();
+  btn.disabled = false; btn.classList.remove('on'); pinging = false;
+}
+
+/* ---------- knobs ---------- */
+const ANG = 135;
+const KNOBS = [
+  {id:'fb',   label:'Feedback',  def:.35, fmt:pct},
+  {id:'dop',  label:'Doppler',   def:.3,  fmt:pct},
+  {id:'dust', label:'Moon Dust', def:.25, fmt:pct},
+  {id:'mix',  label:'Mix',       def:.5,  fmt:pct}
+];
+function knobHTML(k){
+  let dots = '';
+  for (let i=0;i<11;i++){
+    const a = (-ANG + i*(2*ANG/10))*rad;
+    dots += '<circle cx="'+(35*Math.sin(a)).toFixed(2)+'" cy="'+(-35*Math.cos(a)).toFixed(2)+'" r="'+(i%5===0?1.9:1.2)+'"/>';
+  }
+  return '<div class="kw"><div class="knob" id="k-'+k.id+'" role="slider" tabindex="0" aria-labelledby="kl-'+k.id+'" aria-valuemin="0" aria-valuemax="100">'
+    + '<svg class="ticks" viewBox="-40 -40 80 80" aria-hidden="true">'+dots+'</svg><div class="cap"><i></i></div></div>'
+    + '<div class="kl" id="kl-'+k.id+'">'+k.label+'</div><div class="kv" id="kv-'+k.id+'"></div></div>';
+}
+function bindKnob(k){
+  const el = $('#k-'+k.id), cap = el.querySelector('.cap'), kv = $('#kv-'+k.id);
+  let v = k.def, y0 = 0, v0 = 0;
+  function set(nv, silent){
+    v = Math.min(1, Math.max(0, nv));
+    cap.style.transform = 'rotate('+(-ANG + v*2*ANG).toFixed(1)+'deg)';
+    const txt = k.fmt(v);
+    kv.textContent = txt;
+    el.setAttribute('aria-valuenow', Math.round(v*100));
+    el.setAttribute('aria-valuetext', txt);
+    state[k.id] = v;
+    if (!silent) applyLive();
+  }
+  el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); y0 = e.clientY; v0 = v; el.focus(); e.preventDefault(); });
+  el.addEventListener('pointermove', e => { if (el.hasPointerCapture(e.pointerId)) set(v0 + (y0 - e.clientY)/(e.shiftKey ? 520 : 170)); });
+  el.addEventListener('keydown', e => {
+    const st = e.shiftKey ? .1 : .02; let nv = null;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowRight') nv = v + st;
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') nv = v - st;
+    else if (e.key === 'PageUp') nv = v + .1;
+    else if (e.key === 'PageDown') nv = v - .1;
+    else if (e.key === 'Home') nv = 0;
+    else if (e.key === 'End') nv = 1;
+    if (nv !== null){ e.preventDefault(); set(nv); }
+  });
+  el.addEventListener('dblclick', () => set(k.def));
+  set(k.def, true);
+}
+$('#knobs').innerHTML = KNOBS.map(knobHTML).join('');
+KNOBS.forEach(bindKnob);
+
+/* ---------- export ---------- */
+let pending = null;
+function resetExportBtn(){ const b = $('#exportBtn'); if (b) b.textContent = 'Export WAV'; }
+async function saveOut(wav){
+  const name = 'moonbounce-echo';
+  const inFrame = !!(window.claude && typeof window.claude.use === 'function');
+  if (!inFrame){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([wav], {type:'audio/wav'}));
+    a.download = name + '.wav';
+    document.body.appendChild(a); a.click(); a.remove();
+    msg('Saved ' + name + '.wav'); return true;
+  }
+  const dl = await window.claude.use('downloads');
+  if (!dl){ msg('Saving files is not available in this view.'); return false; }
+  try {
+    await dl.save({filename: name + '.zip', data: zipStore(name + '.wav', wav)});
+    msg('Saved ' + name + '.zip. Unzip it to get the WAV.'); return true;
+  } catch (e){
+    msg(e && e.code === 'declined' ? 'Export cancelled.' : 'Could not save the file (' + ((e && e.code) || 'error') + '). Press Save export to try again.');
+    return false;
+  }
+}
+async function exportWav(){
+  const btn = $('#exportBtn');
+  if (pending){
+    btn.disabled = true;
+    const ok = await saveOut(pending);
+    if (ok){ pending = null; resetExportBtn(); }
+    btn.disabled = false; return;
+  }
+  if (!fileBuf) return;
+  btn.disabled = true; msg('Rendering the echo...');
+  try {
+    const sr = fileBuf.sampleRate, p = Object.assign({}, state, {echoOn:true});
+    const g = p.fb*.88;
+    const reps = g < .02 ? 0 : Math.min(12, Math.ceil(Math.log(.003)/Math.log(g)));
+    const tail = Math.min(30, p.T*(1+reps) + 1.5);
+    const len = Math.ceil((fileBuf.duration + tail)*sr);
+    const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    const oc = new OC(2, len, sr);
+    const n = buildGraph(oc);
+    applyTo(n, oc, p, true);
+    scheduleDrift(n, 0, len/sr, 20261111);
+    const s = oc.createBufferSource(); s.buffer = fileBuf; s.connect(n.input); s.start(0);
+    const out = await oc.startRendering();
+    const wav = encodeWav(out);
+    const ok = await saveOut(wav);
+    if (!ok){ pending = wav; btn.textContent = 'Save export'; }
+  } catch (e){
+    msg('Export failed: ' + (e && e.message ? e.message : 'unknown error'));
+  }
+  btn.disabled = false; ui();
+}
+
+/* ---------- monitor scene ---------- */
+const cv = $('#lcd'), W = 160, H = 150;
+const cs = getComputedStyle(document.documentElement);
+const BG = cs.getPropertyValue('--scr').trim() || '#1a1e25';
+const INK = cs.getPropertyValue('--cream').trim() || '#ece6d2';
+const DIM = cs.getPropertyValue('--scr-dim').trim() || '#3c424d';
+const SHADE = cs.getPropertyValue('--cream-shade').trim() || '#b4af9d';
+let g = cv.getContext('2d');
+const MOON = {x:34, y:80, r:13};
+const GROUND = 134;
+const STN = [{bx:10, px:17, py:121}, {bx:128, px:135, py:121}];
+const rand = rng(11);
+const stars = [];
+for (let guard = 0; stars.length < 30 && guard < 800; guard++){
+  const x = 1 + Math.floor(rand()*158), y = 56 + Math.floor(rand()*52);
+  if (Math.hypot(x-MOON.x, y-MOON.y) < MOON.r + 8) continue;
+  if (y > 96 && (Math.abs(x-17) < 14 || Math.abs(x-135) < 14)) continue;
+  if (stars.some(s => Math.abs(s.x-x) < 6 && Math.abs(s.y-y) < 6)) continue;
+  stars.push({x, y, p:500 + rand()*1400, o:rand()*4, big:rand() < .5});
+}
+const sparkles = [[112,68,3],[88,98,2]];
+const grass = []; for (let x=0;x<W;x++) grass.push(rand() < .32 ? (rand() < .4 ? 2 : 1) : 0);
+
+function rect(x,y,w,h,c){ g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), w, h); }
+function dot(x,y,c){ rect(x,y,1,1,c); }
+function sparkle(x,y,len,c){ dot(x,y,c); for (let i=1;i<=len;i++){ dot(x+i,y,c); dot(x-i,y,c); dot(x,y+i,c); dot(x,y-i,c); } }
+function rot(x,y,a){ const s = Math.sin(a), c = Math.cos(a); return [x*c - y*s, x*s + y*c]; }
+function ease(x){ x = Math.min(1, Math.max(0, x)); return x*x*(3-2*x); }
+const mix1 = (a,b,q) => a + (b-a)*q;
+
+function drawMoon(){
+  const r = MOON.r + 2;
+  for (let dy=-r; dy<=r; dy++) for (let dx=-r; dx<=r; dx++){
+    if (Math.hypot(dx, dy) <= MOON.r + .4) dot(MOON.x+dx, MOON.y+dy, INK);
+  }
+  [[-5,-4,2.4],[3,1,1.7],[-2,6,1.5],[6,-5,1.1],[-7,3,1.1]].forEach(c => {
+    for (let dy=-3; dy<=3; dy++) for (let dx=-3; dx<=3; dx++) if (Math.hypot(dx,dy) <= c[2]) dot(MOON.x+c[0]+dx, MOON.y+c[1]+dy, SHADE);
+  });
+}
+const base = document.createElement('canvas'); base.width = W; base.height = H;
+function buildBase(){
+  const main = g; g = base.getContext('2d');
+  rect(0,0,W,H,BG);
+  drawMoon();
+  rect(0,GROUND,W,1,INK);
+  for (let x=0;x<W;x++) for (let i=1;i<=grass[x];i++) dot(x, GROUND-i, INK);
+  [5,28,52,76,100,122,152].forEach((x,i) => { const h = 4 + (i%3); rect(x, GROUND-h, 1, h, INK); dot(x-1, GROUND-h+1, INK); dot(x+1, GROUND-h+2, INK); });
+  for (let y=GROUND+2;y<H;y++) for (let x=(y&1);x<W;x+=2) dot(x,y,DIM);
+  g = main;
+}
+function station(s, a){
+  rect(s.bx, 124, 14, 1, INK); rect(s.bx, 133, 14, 1, INK); rect(s.bx, 124, 1, 10, INK); rect(s.bx+13, 124, 1, 10, INK);
+  rect(s.bx+3, 126, 3, 2, INK); rect(s.bx+8, 126, 3, 2, INK); rect(s.bx, 129, 14, 1, INK);
+  rect(s.px-1, s.py+2, 2, 3, INK);
+  const put = (x,y) => { const r = rot(x,y,a); dot(s.px + r[0], s.py + r[1], INK); };
+  for (let u=-7; u<=7; u+=.3){ const yb = -4 + 4*Math.sqrt(Math.max(0, 1-(u/7)*(u/7))); put(u,yb); }
+  for (let u=-7; u<=7; u+=.5) put(u,-4);
+  for (let y=-5; y>=-9; y--) put(0,y);
+  put(-1,-9); put(1,-9);
+  const t = rot(0,-10,a);
+  return {x:s.px + t[0], y:s.py + t[1]};
+}
+function lerpP(a,b,q){ return {x:a.x+(b.x-a.x)*q, y:a.y+(b.y-a.y)*q}; }
+function surf(from){
+  const dx = from.x-MOON.x, dy = from.y-MOON.y, l = Math.hypot(dx,dy) || 1;
+  return {x:MOON.x + dx/l*(MOON.r+2), y:MOON.y + dy/l*(MOON.r+2)};
+}
+function leg(a, b, q){
+  for (let k=0; k<=q; k+=.045){ const p = lerpP(a,b,k); dot(p.x,p.y,DIM); }
+  [0,.05,.1].forEach((d,i) => {
+    const qq = q - d; if (qq < 0) return;
+    const p = lerpP(a,b,qq);
+    if (i === 0) rect(p.x-1, p.y-1, 3, 3, INK); else rect(p.x, p.y, 2, 2, INK);
+  });
+}
+let tx = null;
+let shoot = null, nextShoot = performance.now() + 2500;
+function transmit(){ tx = {t0:performance.now(), dur:state.T*1000}; }
+function draw(now){
+  g.drawImage(base, 0, 0);
+  stars.forEach(s => { if (reduced || (Math.floor(now/s.p + s.o) % 4) !== 0){ if (s.big) rect(s.x, s.y, 2, 2, INK); else dot(s.x, s.y, INK); } });
+  sparkles.forEach(s => sparkle(s[0], s[1], s[2], INK));
+  if (!reduced){
+    if (!shoot && now > nextShoot) shoot = {t0:now, x:100 + Math.random()*50, y:58 + Math.random()*18};
+    if (shoot){
+      const q = (now - shoot.t0)/700;
+      if (q >= 1){ shoot = null; nextShoot = now + 5000 + Math.random()*8000; }
+      else for (let i=0; i<8; i++){
+        const qq = q - i*.03; if (qq < 0) break;
+        const px = shoot.x - 40*qq, py = shoot.y + 18*qq;
+        if (i === 0) rect(px, py, 2, 2, INK); else dot(px, py, i < 4 ? INK : DIM);
+      }
+    }
+  }
+  let el = -1;
+  if (tx){ el = Math.max(0, now - tx.t0); if (el > tx.dur + 900){ tx = null; el = -1; } }
+  const f = tx ? ease(el/300) * (1 - ease((el - tx.dur - 500)/400)) : 0;
+  const sway = reduced ? 0 : .035*Math.sin(now/2300);
+  const tipL = station(STN[0], mix1(0, .45, f) + sway);
+  const tipR = station(STN[1], mix1(-.3, -.8, f) - sway);
+  if (!tx) return;
+  const half = tx.dur/2, dur = tx.dur;
+  const b1 = surf(tipL), a2 = surf(tipR);
+  if (el < half) leg(tipL, b1, el/half);
+  else { leg(tipL, b1, 1); leg(a2, tipR, Math.min(1, (el-half)/half)); }
+  if (el < 250) sparkle(Math.round(tipL.x), Math.round(tipL.y), el < 120 ? 4 : 2, INK);
+  if (el > half-60 && el < half+280){
+    for (let a=0; a<6.28; a+=.14) dot(MOON.x + Math.cos(a)*(MOON.r+4), MOON.y + Math.sin(a)*(MOON.r+4), INK);
+  }
+  if (el >= dur && el < dur+500) sparkle(Math.round(tipR.x), Math.round(tipR.y), 6 - Math.floor((el-dur)/100), INK);
+}
+let last = 0;
+function frame(t){ requestAnimationFrame(frame); if (t - last < 45) return; last = t; draw(t); }
+
+/* ---------- wiring ---------- */
+$('#ping').addEventListener('click', ping);
+function setAB(echo){
+  state.echoOn = echo;
+  $('#abEcho').setAttribute('aria-pressed', String(echo));
+  $('#abOrig').setAttribute('aria-pressed', String(!echo));
+  applyLive();
+}
+$('#abEcho').addEventListener('click', () => setAB(true));
+$('#abOrig').addEventListener('click', () => setAB(false));
+$('#loadBtn').addEventListener('click', () => { ensureAudio(); $('#file').click(); });
+$('#file').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f || !ensureAudio()) return;
+  msg('Reading ' + f.name + '...');
+  try { setFile(await ctx.decodeAudioData(await f.arrayBuffer()), f.name); }
+  catch (err){ msg('That file could not be decoded. Try WAV, MP3 or M4A. AIFF only works in some browsers.'); }
+});
+$('#demoBtn').addEventListener('click', async () => {
+  ensureAudio();
+  try { setFile(await makeDemo(), 'Demo sound'); play(); }
+  catch (err){ msg('Could not build the demo sound in this browser.'); }
+});
+$('#playBtn').addEventListener('click', () => { if (playing) pause(); else play(); });
+$('#stopBtn').addEventListener('click', () => { stopSrc(); offset = 0; ui(); });
+$('#loop').addEventListener('change', e => { loop = e.target.checked; if (src) src.loop = loop; });
+const seek = $('#seek');
+seek.addEventListener('pointerdown', () => { seeking = true; });
+seek.addEventListener('pointerup', () => { seeking = false; });
+seek.addEventListener('change', () => { seeking = false; });
+seek.addEventListener('input', () => {
+  if (!fileBuf) return;
+  const sec = seek.value/1000*fileBuf.duration, was = playing;
+  if (was) stopSrc();
+  offset = Math.min(sec, fileBuf.duration - .02);
+  if (was) play(true); else ui();
+});
+$('#exportBtn').addEventListener('click', exportWav);
+
+renderPill();
+buildBase();
+draw(performance.now());
+requestAnimationFrame(frame);
+setInterval(() => { ui(); topUpDrift(); }, 250);
+})();
+</script>
+
+</body>
+</html>
