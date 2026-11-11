@@ -105,8 +105,8 @@
      each project paragraph when it scrolls into view. Skipped for people who've asked to reduce motion. */
   @media (prefers-reduced-motion: no-preference) {
     .fade-pending .hero, .fade-pending .project > p { opacity: 0; } /* hidden for a moment while lines are measured */
-    .fade-ready .fw { opacity: 0; }
-    .fade-ready .in .fw { animation: line-in .9s ease forwards; animation-delay: calc(var(--line, 0) * 110ms + 80ms); }
+    .fade-ready .fw, .fade-ready .hero .headshot { opacity: 0; }
+    .fade-ready .in .fw, .fade-ready .hero.in .headshot { animation: line-in .9s ease forwards; animation-delay: calc(var(--line, 0) * 110ms + 80ms); }
   }
   @keyframes line-in { to { opacity: 1; } }
 
@@ -382,6 +382,10 @@
         if (top > lastTop + 4) { line++; lastTop = top; }
         w.style.setProperty('--line', line);
       }
+      // the headshot fades in with the text: alongside the email line on desktop (where it sits beside it),
+      // and just after it on phones (where it sits below it)
+      const hs = el.querySelector('.headshot'), mail = el.querySelector('a.mail .fw');
+      if (hs && mail) { const l = +mail.style.getPropertyValue('--line'); hs.style.setProperty('--line', hs.getBoundingClientRect().top > mail.getBoundingClientRect().bottom ? l + 1 : l); }
     };
     let done = false;
     const go = () => {
