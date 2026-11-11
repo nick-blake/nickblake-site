@@ -162,7 +162,8 @@ button{font:inherit}
   .unit{border-radius:0;box-shadow:none;display:flex;flex-direction:column;justify-content:space-between;
     padding:max(12px,env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 12px max(14px,env(safe-area-inset-left,0px));
     height:calc(100vh - var(--player-h, 190px));height:calc(100dvh - var(--player-h, 190px));
-    min-height:490px} /* exactly one screen tall, but never so short that the screen drops below its minimum (very short phones scroll a little) */
+    min-height:476px} /* exactly one screen tall, but never so short that the screen drops below its minimum (very short phones scroll a little) */
+  .fname{line-height:1.1}
   .strip{margin-bottom:8px;flex:none}
   /* the screen shrinks to fit short phones (trimming empty sky off the top) but never grows past its natural shape,
      so the dishes at the sides are never cut off; on tall phones the spare room spreads out between sections */
@@ -172,7 +173,6 @@ button{font:inherit}
   .lcd{flex:0 1 calc((100vw - 44px)*.9375);min-height:220px;max-height:calc((100vw - 44px)*.9375);border-radius:10px}
   #lcd{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 100%}
   .log{left:8px;right:8px;top:6px;padding:3px 9px 2px;font-size:15px;line-height:1.05}
-  .log > div:first-child{display:none} /* phones: just time + source, so the Moon has room */
   .ping{flex:none;margin-top:10px;min-height:40px;font-size:13px}
   .seg button{min-height:36px}
   .player .btn{min-height:36px}
@@ -182,7 +182,7 @@ button{font:inherit}
   .knob{width:clamp(48px,13.5vw,54px)}
   .kl-full{display:none}
   .kl-short{display:inline}
-  .player{margin-top:0;border-radius:0;border-width:14px;border-top-width:0;
+  .player{margin-top:0;border-radius:0;border-width:14px;border-top-width:0;padding-top:10px;gap:6px;
     padding-bottom:max(10px,env(safe-area-inset-bottom,0px));box-shadow:inset 0 4px 10px rgba(0,0,0,.65)}
   .player + .row{margin-top:20px;padding:0 16px}
   .player ~ .msg{padding:0 16px}
@@ -739,7 +739,7 @@ const INK = cs.getPropertyValue('--cream').trim() || '#ece6d2';
 const DIM = cs.getPropertyValue('--scr-dim').trim() || '#3c424d';
 const SHADE = cs.getPropertyValue('--cream-shade').trim() || '#b4af9d';
 let g = cv.getContext('2d');
-const MOON = {x:34, y:80, r:13};
+const MOON = {x:34, y:80, r:13}; // y moves down on short phone screens so the Moon stays clear of the readout (see placeMoon)
 const GROUND = 134;
 const STN = [{bx:10, px:17, py:121}, {bx:128, px:135, py:121}];
 const rand = rng(11);
@@ -813,8 +813,9 @@ let echoT0 = 0, echoAim = 0;
 function transmit(){ tx = {t0:performance.now(), dur:state.T*1000}; echoT0 = tx.t0; }
 function draw(now){
   g.drawImage(base, 0, 0);
-  stars.forEach(s => { if (reduced || (Math.floor(now/s.p + s.o) % 4) !== 0){ if (s.big) rect(s.x, s.y, 2, 2, INK); else dot(s.x, s.y, INK); } });
-  sparkles.forEach(s => sparkle(s[0], s[1], s[2], INK));
+  const nearMoon = (x, y, pad) => Math.hypot(x-MOON.x, y-MOON.y) < MOON.r + pad;
+  stars.forEach(s => { if (nearMoon(s.x, s.y, 4)) return; if (reduced || (Math.floor(now/s.p + s.o) % 4) !== 0){ if (s.big) rect(s.x, s.y, 2, 2, INK); else dot(s.x, s.y, INK); } });
+  sparkles.forEach(s => { if (!nearMoon(s[0], s[1], s[2] + 3)) sparkle(s[0], s[1], s[2], INK); });
   if (!reduced){
     if (!shoot && now > nextShoot) shoot = {t0:now, x:100 + Math.random()*50, y:58 + Math.random()*18};
     if (shoot){
@@ -952,7 +953,22 @@ renderPill();
   pending = null; resetExportBtn();
   renderPill();
 })();
+// On short phone screens the top of the scene is trimmed and the readout sits lower in the scene,
+// so move the Moon down just enough to clear it (never past y 96, where it would crowd the dishes).
+function placeMoon(){
+  const r = cv.getBoundingClientRect(), lg = document.getElementById('log').getBoundingClientRect();
+  let y = 80;
+  if (r.width && r.height){
+    const scale = r.width / W, shownTop = Math.max(0, H - r.height/scale);   // canvas rows hidden off the top
+    const logBottom = shownTop + (lg.bottom - r.top)/scale;                    // readout's lower edge, in canvas rows
+    y = Math.round(Math.min(96, Math.max(80, logBottom + MOON.r + 4)));
+  }
+  if (y !== MOON.y){ MOON.y = y; buildBase(); }
+}
 buildBase();
+placeMoon();
+if ('ResizeObserver' in window){ const ro = new ResizeObserver(placeMoon); ro.observe(cv); ro.observe(document.getElementById('log')); } else addEventListener('resize', placeMoon);
+if (document.fonts) document.fonts.ready.then(placeMoon);
 draw(performance.now());
 requestAnimationFrame(frame);
 setInterval(() => { ui(); topUpDrift(); }, 250);
