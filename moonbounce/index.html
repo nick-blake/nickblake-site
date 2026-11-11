@@ -84,8 +84,12 @@ button{font:inherit}
 .ping:disabled{cursor:progress}
 /* the player is docked into the device: the device's plate wraps around it */
 .unit{border-radius:12px 12px 0 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
-.player{margin-top:-24px;border:16px solid var(--plate-lo);border-top-width:0;border-radius:0 0 12px 12px;
-  box-shadow:inset 0 4px 10px rgba(0,0,0,.65),0 10px 22px rgba(0,0,0,.5)}
+.player{margin-top:-24px;border:16px solid transparent;border-top-width:0;border-radius:0 0 12px 12px;
+  /* the frame is the same brushed metal as the device (stripes + shading), with the dark bay set into it */
+  background:linear-gradient(var(--panel),var(--panel)) padding-box,
+    repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px) border-box,
+    linear-gradient(180deg,var(--plate-lo),#6f6c63) border-box;
+  box-shadow:inset 0 4px 10px rgba(0,0,0,.65),inset 0 -2px 0 rgba(0,0,0,.2),0 10px 22px rgba(0,0,0,.5)}
 .player + .row{margin-top:14px} /* Export sits outside the device, clear of its shadow */
 
 .knobs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}
@@ -108,7 +112,7 @@ button{font:inherit}
 .btn:hover:not(:disabled){background:var(--fg);color:var(--ink)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn:focus-visible,#seek:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
-.player{position:relative;display:grid;gap:10px;padding:16px 12px 10px;background:var(--panel)}
+.player{position:relative;display:grid;gap:10px;padding:16px 12px 10px}
 .deck{display:grid;grid-template-columns:auto auto 1fr auto auto;grid-template-areas:"play stop seek time loop";align-items:center;gap:10px}
 /* the player is part of the device now, so its buttons are hardware keys: the same treatment as Ping Moon */
 .tbtn,.loopt,.player .btn,.player .btn.solid{border:1px solid var(--key-edge);border-radius:3px;color:var(--ink);cursor:pointer;
