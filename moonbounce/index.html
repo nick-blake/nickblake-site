@@ -48,6 +48,7 @@ button{font:inherit}
 .strip{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;margin-bottom:12px}
 .brand{font:700 10px/1.2 var(--font-px);letter-spacing:.14em;text-transform:uppercase}
 .stripctl{display:flex;align-items:center;gap:8px} /* echo controls: the Original/Moon Echo switch and Clear */
+@media (max-width:560px){.stripctl{width:100%;justify-content:space-between}} /* phones: the mode pair on the left, Clear on the right edge */
 /* hardware keys, same treatment as Ping Moon: raised and shaded, pressed in when selected or tapped */
 .seg{display:flex;gap:6px}
 .seg button{min-height:40px;padding:0 12px;border:1px solid var(--key-edge);border-radius:3px;color:var(--ink);cursor:pointer;font:700 10px/1 var(--font-px);letter-spacing:.1em;text-transform:uppercase;
@@ -81,6 +82,11 @@ button{font:inherit}
   box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),0 1px 0 rgba(255,255,255,.45),0 2px 4px rgba(0,0,0,.3)}
 .ping:active,.ping.on{background:linear-gradient(180deg,var(--key-bot),var(--key-top));box-shadow:inset 0 2px 5px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.45)}
 .ping:disabled{cursor:progress}
+/* the player is docked into the device: the device's plate wraps around it */
+.unit{border-radius:12px 12px 0 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.player{margin-top:-24px;border:16px solid var(--plate-lo);border-top-width:0;border-radius:0 0 12px 12px;
+  box-shadow:inset 0 4px 10px rgba(0,0,0,.65),0 10px 22px rgba(0,0,0,.5)}
+.player + .row{margin-top:14px} /* Export sits outside the device, clear of its shadow */
 
 .knobs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}
 @media (max-width:340px){.knobs{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:20px}}
@@ -102,41 +108,35 @@ button{font:inherit}
 .btn:hover:not(:disabled){background:var(--fg);color:var(--ink)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn:focus-visible,#seek:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
-/* player bar: flat retro controls in the same style as Load audio / Export, right next to the seek bar */
-.player{position:relative;display:grid;gap:10px;padding:16px 12px 10px;border:2px solid var(--line);border-radius:2px;background:var(--panel)}
-/* the player feeds the device: an INPUT tab on the frame, and a dotted signal line up into the device above */
-.player::after{content:"Input";position:absolute;top:-8px;left:12px;padding:0 6px;background:var(--bg);color:var(--muted);font:700 9px/14px var(--font-px);letter-spacing:.14em;text-transform:uppercase}
-.player::before{content:"";position:absolute;left:50%;bottom:100%;width:2px;height:26px;margin-left:-1px;opacity:.3;
-  background:repeating-linear-gradient(0deg,var(--cream) 0 2px,transparent 2px 6px)}
-.player.live::before{opacity:1;animation:feed .5s linear infinite} /* dots flow up into the device while your music is being sent */
-@keyframes feed{to{background-position:0 -6px}}
-@media (prefers-reduced-motion:reduce){.player.live::before{animation:none}}
+.player{position:relative;display:grid;gap:10px;padding:16px 12px 10px;background:var(--panel)}
 .deck{display:grid;grid-template-columns:auto auto 1fr auto auto;grid-template-areas:"play stop seek time loop";align-items:center;gap:10px}
-/* same look as .btn: 2px cream outline, square corners, no shading */
-.tbtn,.loopt{min-height:44px;border:2px solid var(--cream);border-radius:2px;background:transparent;color:var(--cream);cursor:pointer}
-.tbtn{width:52px;display:grid;place-items:center;padding:0}
+/* the player is part of the device now, so its buttons are hardware keys: the same treatment as Ping Moon */
+.tbtn,.loopt,.player .btn,.player .btn.solid{border:1px solid var(--key-edge);border-radius:3px;color:var(--ink);cursor:pointer;
+  background:linear-gradient(180deg,var(--key-top),var(--key-bot));
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),0 1px 0 rgba(255,255,255,.45),0 2px 4px rgba(0,0,0,.3)}
+.player .btn:hover:not(:disabled){background:linear-gradient(180deg,var(--key-top),var(--key-bot));color:var(--ink)}
+.tbtn{width:52px;min-height:44px;display:grid;place-items:center;padding:0}
 .tbtn svg{width:16px;height:16px;fill:currentColor}
 .tbtn .i-play{width:20px;height:20px} /* 10x10 grid at 2px per square, so it matches the stop square's weight */
-.tbtn.play{grid-area:play;background:var(--cream);color:var(--ink)} /* the main action is filled, like Load audio */
+.tbtn.play{grid-area:play}
 .tbtn.stop{grid-area:stop}
-.tbtn:hover:not(:disabled),.loopt:hover{background:var(--fg);color:var(--ink)}
+/* pressed: exactly like Ping Moon when pressed. Play (while playing) and Loop (while on) stay latched down */
+.tbtn:active:not(:disabled),.tbtn.on,.loopt:active,.loopt:has(input:checked),.player .btn:active:not(:disabled){background:linear-gradient(180deg,var(--key-bot),var(--key-top));box-shadow:inset 0 2px 5px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.45)}
 .tbtn:disabled{opacity:.4;cursor:not-allowed}
-.tbtn:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
+.tbtn:focus-visible,.player .btn:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
 .tbtn .i-pause, .tbtn.on .i-play{display:none}
 .tbtn.on .i-pause{display:block}
 .deck #seek{grid-area:seek}
 .deck .time{grid-area:time}
-/* Loop: outlined when off, filled when on */
-.loopt{grid-area:loop;position:relative;display:flex;align-items:center;padding:0 14px;font:700 11px/1 var(--font-px);letter-spacing:.08em;text-transform:uppercase}
+.loopt{grid-area:loop;position:relative;display:flex;align-items:center;min-height:44px;padding:0 14px;font:700 11px/1 var(--font-px);letter-spacing:.08em;text-transform:uppercase}
 .loopt input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
-.loopt:has(input:checked){background:var(--cream);color:var(--ink)}
 .loopt:has(input:focus-visible){outline:2px solid var(--cream);outline-offset:3px}
-/* seek bar: flat, outlined track with a solid square handle */
+/* seek bar: a recessed slot with a key-style handle */
 .deck #seek{-webkit-appearance:none;appearance:none;height:28px;background:transparent;cursor:pointer}
-.deck #seek::-webkit-slider-runnable-track{height:8px;background:transparent;border:2px solid var(--cream);border-radius:0}
-.deck #seek::-moz-range-track{height:8px;background:transparent;border:2px solid var(--cream);border-radius:0}
-.deck #seek::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:20px;margin-top:-8px;border:0;border-radius:0;background:var(--cream)}
-.deck #seek::-moz-range-thumb{width:10px;height:20px;border:0;border-radius:0;background:var(--cream)}
+.deck #seek::-webkit-slider-runnable-track{height:8px;background:#0c0d0f;border:1px solid #000;border-radius:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.08)}
+.deck #seek::-moz-range-track{height:8px;background:#0c0d0f;border:1px solid #000;border-radius:2px}
+.deck #seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:22px;margin-top:-8px;border:1px solid var(--key-edge);border-radius:2px;background:linear-gradient(180deg,var(--key-top),var(--key-bot));box-shadow:inset 0 0 0 1px rgba(255,255,255,.4),0 1px 3px rgba(0,0,0,.5)}
+.deck #seek::-moz-range-thumb{width:14px;height:22px;border:1px solid var(--key-edge);border-radius:2px;background:linear-gradient(180deg,var(--key-top),var(--key-bot))}
 .deck #seek:disabled{opacity:.4;cursor:not-allowed}
 @media (max-width:520px){
   .deck{grid-template-columns:auto auto 1fr auto;grid-template-areas:"play stop time loop" "seek seek seek seek"}
@@ -749,7 +749,6 @@ function leg(a, b, q){
 }
 let tx = null;
 const meterBuf = new Float32Array(512); let echoLvl = 0;
-const playerEl = document.querySelector('.player');
 let shoot = null, nextShoot = performance.now() + 2500;
 let echoT0 = 0, echoAim = 0;
 function transmit(){ tx = {t0:performance.now(), dur:state.T*1000}; echoT0 = tx.t0; }
@@ -777,7 +776,6 @@ function draw(now){
     echoLvl = Math.max(Math.sqrt(sum/meterBuf.length), echoLvl*.85);
   } else echoLvl = 0;
   const echoing = state.echoOn && echoLvl > .003; // animation is for your music's echo only (not Ping, not Original mode)
-  if (playerEl) playerEl.classList.toggle('live', playing && state.echoOn); // the signal line into the device
   echoAim += ((echoing ? 1 : 0) - echoAim) * .15; // dishes stay pointed at the Moon while the echo is audible
   const f = Math.max(tx ? ease(el/300) * (1 - ease((el - tx.dur - 500)/400)) : 0, ease(echoAim));
   const sway = reduced ? 0 : .035*Math.sin(now/2300);
