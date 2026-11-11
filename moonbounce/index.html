@@ -143,7 +143,7 @@ button{font:inherit}
     <div class="row">
       <button class="btn" id="playBtn" type="button" disabled>Play</button>
       <button class="btn" id="stopBtn" type="button" disabled>Stop</button>
-      <label class="chk"><input type="checkbox" id="loop"> Loop</label>
+      <label class="chk"><input type="checkbox" id="loop" checked> Loop</label>
     </div>
     <div class="seekrow">
       <input type="range" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek" disabled>
@@ -287,6 +287,7 @@ function buildGraph(c){
   n.fade.connect(n.env); n.env.connect(n.envLP); n.envLP.connect(n.envG); n.envG.connect(n.nvca.gain);
   n.master.connect(n.comp); n.comp.connect(c.destination);
   n.dopSrc.start(); n.fadeSrc.start(); n.noise.start(); n.nlfo.start();
+  n.meter = c.createAnalyser(); n.meter.fftSize = 512; n.fade.connect(n.meter); // how loud the echo is right now (drives the screen)
   return n;
 }
 function applyTo(n, c, p, imm){
@@ -383,7 +384,7 @@ function blip(){
 }
 
 /* ---------- transport ---------- */
-let fileBuf = null, src = null, playing = false, offset = 0, baseOff = 0, startedAt = 0, loop = false, seeking = false;
+let fileBuf = null, src = null, playing = false, offset = 0, baseOff = 0, startedAt = 0, loop = true, seeking = false; // loops by default (the box starts ticked), so the knobs can be tweaked while listening
 const fmtT = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); };
 function pos(){
   if (!playing) return offset;
@@ -401,10 +402,24 @@ function play(quiet){
   s.onended = () => { if (src === s){ src = null; playing = false; offset = 0; ui(); } };
   s.start(0, offset);
   src = s; baseOff = offset; startedAt = ctx.currentTime; playing = true;
-  if (!quiet) transmit();
+  if (!quiet && state.echoOn) transmit();
   ui();
 }
 function pause(){ if (!playing) return; offset = pos(); stopSrc(); ui(); }
+// Stop means silence: fade out whatever is still echoing (no click) and swap in a fresh, empty echo
+// with the same settings. Pause doesn't do this, so the echo can ring out naturally.
+function silenceEcho(){
+  if (!ctx || !nodes) return;
+  const old = nodes, t = ctx.currentTime;
+  old.master.gain.cancelScheduledValues(t); old.master.gain.setValueAtTime(old.master.gain.value, t);
+  old.master.gain.linearRampToValueAtTime(0, t + .03);
+  nodes = buildGraph(ctx); applyTo(nodes, ctx, state, true); driftTo = 0; topUpDrift();
+  echoLvl = 0; echoAim = 0; // the echo beams on the screen go dark at once, matching the silence
+  setTimeout(() => {
+    for (const k of ['dopSrc', 'fadeSrc', 'noise', 'nlfo']) { try { old[k].stop(); } catch (e) {} }
+    try { old.comp.disconnect(); } catch (e) {}
+  }, 80);
+}
 function ui(){
   const has = !!fileBuf;
   $('#playBtn').disabled = !has; $('#stopBtn').disabled = !has; $('#seek').disabled = !has;
@@ -522,7 +537,7 @@ KNOBS.forEach(bindKnob);
 let pending = null;
 function resetExportBtn(){ const b = $('#exportBtn'); if (b) b.textContent = 'Export WAV'; }
 const MIME = {wav:'audio/wav', mp3:'audio/mpeg'};
-async function saveOut(bytes, ext){
+async function saveOut(bytes, ext, what){ // what: e.g. 'your sound once, plus 12.4 s of echo tail'
   const name = 'moonbounce-echo';
   const inFrame = !!(window.claude && typeof window.claude.use === 'function');
   if (!inFrame){
@@ -530,13 +545,13 @@ async function saveOut(bytes, ext){
     a.href = URL.createObjectURL(new Blob([bytes], {type:MIME[ext]}));
     a.download = name + '.' + ext;
     document.body.appendChild(a); a.click(); a.remove();
-    msg('Saved ' + name + '.' + ext); return true;
+    msg('Saved ' + name + '.' + ext + (what ? ': ' + what + '.' : '')); return true;
   }
   const dl = await window.claude.use('downloads');
   if (!dl){ msg('Saving files is not available in this view.'); return false; }
   try {
     await dl.save({filename: name + '.zip', data: zipStore(name + '.' + ext, bytes)});
-    msg('Saved ' + name + '.zip. Unzip it to get the ' + ext.toUpperCase() + '.'); return true;
+    msg('Saved ' + name + '.zip' + (what ? ' (' + what + ')' : '') + '. Unzip it to get the ' + ext.toUpperCase() + '.'); return true;
   } catch (e){
     msg(e && e.code === 'declined' ? 'Export cancelled.' : 'Could not save the file (' + ((e && e.code) || 'error') + '). Press Save export to try again.');
     return false;
@@ -583,7 +598,7 @@ async function exportAudio(ext){
   const btn = $('#exportBtn'), mbtn = $('#mp3Btn');
   if (pending){
     btn.disabled = true;
-    const ok = await saveOut(pending.bytes, pending.ext);
+    const ok = await saveOut(pending.bytes, pending.ext, pending.what);
     if (ok){ pending = null; resetExportBtn(); }
     btn.disabled = false; ui(); return;
   }
@@ -594,8 +609,10 @@ async function exportAudio(ext){
     if (ext === 'mp3' && ![32000, 44100, 48000].includes(sr)) sr = 44100;
     const out = await renderEcho(sr);
     const bytes = ext === 'mp3' ? await encodeMp3(out) : encodeWav(out);
-    const ok = await saveOut(bytes, ext);
-    if (!ok){ pending = {bytes, ext}; btn.textContent = 'Save export'; }
+    // the file is always one pass of the sound plus its full echo tail, whatever the player is doing
+    const what = 'your sound once, plus ' + Math.max(0, out.duration - fileBuf.duration).toFixed(1) + ' s of echo tail';
+    const ok = await saveOut(bytes, ext, what);
+    if (!ok){ pending = {bytes, ext, what}; btn.textContent = 'Save export'; }
   } catch (e){
     msg('Export failed: ' + (e && e.message ? e.message : 'unknown error'));
   }
@@ -678,8 +695,10 @@ function leg(a, b, q){
   });
 }
 let tx = null;
+const meterBuf = new Float32Array(512); let echoLvl = 0;
 let shoot = null, nextShoot = performance.now() + 2500;
-function transmit(){ tx = {t0:performance.now(), dur:state.T*1000}; }
+let echoT0 = 0, echoAim = 0;
+function transmit(){ tx = {t0:performance.now(), dur:state.T*1000}; echoT0 = tx.t0; }
 function draw(now){
   g.drawImage(base, 0, 0);
   stars.forEach(s => { if (reduced || (Math.floor(now/s.p + s.o) % 4) !== 0){ if (s.big) rect(s.x, s.y, 2, 2, INK); else dot(s.x, s.y, INK); } });
@@ -698,10 +717,28 @@ function draw(now){
   }
   let el = -1;
   if (tx){ el = Math.max(0, now - tx.t0); if (el > tx.dur + 900){ tx = null; el = -1; } }
-  const f = tx ? ease(el/300) * (1 - ease((el - tx.dur - 500)/400)) : 0;
+  if (nodes && nodes.meter){
+    nodes.meter.getFloatTimeDomainData(meterBuf);
+    let sum = 0; for (const x of meterBuf) sum += x*x;
+    echoLvl = Math.max(Math.sqrt(sum/meterBuf.length), echoLvl*.85);
+  } else echoLvl = 0;
+  const echoing = state.echoOn && echoLvl > .003; // in Original (dry) mode there is no echo to show
+  echoAim += ((echoing ? 1 : 0) - echoAim) * .15; // dishes stay pointed at the Moon while the echo is audible
+  const f = Math.max(tx ? ease(el/300) * (1 - ease((el - tx.dur - 500)/400)) : 0, ease(echoAim));
   const sway = reduced ? 0 : .035*Math.sin(now/2300);
   const tipL = station(STN[0], mix1(0, .45, f) + sway);
   const tipR = station(STN[1], mix1(-.3, -.8, f) - sway);
+  // echo beams: while the echo is audible, the path dish -> Moon -> dish stays lit and a pulse makes each round trip,
+  // timed to the real Earth-Moon delay, so each echo you hear lands as a pulse reaches the right-hand dish
+  if (echoing && !tx){
+    const k = Math.min(1, echoLvl*8), c = k > .35 ? INK : DIM, gap = .06 + (1-k)*.12;
+    const b1 = surf(tipL), a2 = surf(tipR);
+    for (let q=0; q<=1; q+=gap){ const p1 = lerpP(tipL,b1,q), p2 = lerpP(a2,tipR,q); dot(p1.x,p1.y,DIM); dot(p2.x,p2.y,DIM); }
+    const ph = reduced ? .25 : (((now - echoT0) / (state.T*1000)) % 1 + 1) % 1;
+    const p = ph < .5 ? lerpP(tipL, b1, ph*2) : lerpP(a2, tipR, (ph-.5)*2);
+    rect(p.x-1, p.y-1, k > .35 ? 3 : 2, k > .35 ? 3 : 2, c);
+    if (!reduced && Math.abs(ph-.5) < .04) for (let an=0; an<6.28; an+=.28) dot(MOON.x + Math.cos(an)*(MOON.r+4), MOON.y + Math.sin(an)*(MOON.r+4), c);
+  }
   if (!tx) return;
   const half = tx.dur/2, dur = tx.dur;
   const b1 = surf(tipL), a2 = surf(tipR);
@@ -722,6 +759,7 @@ function setAB(echo){
   state.echoOn = echo;
   $('#abEcho').setAttribute('aria-pressed', String(echo));
   $('#abOrig').setAttribute('aria-pressed', String(!echo));
+  if (!echo) tx = null; // Original: drop any beam on its way to the Moon
   applyLive();
 }
 $('#abEcho').addEventListener('click', () => setAB(true));
@@ -774,7 +812,7 @@ $('#demoBtn').addEventListener('click', async () => {
   catch (err){ msg('Could not build the demo sound in this browser.'); }
 });
 $('#playBtn').addEventListener('click', () => { if (playing) pause(); else play(); });
-$('#stopBtn').addEventListener('click', () => { stopSrc(); offset = 0; ui(); });
+$('#stopBtn').addEventListener('click', () => { stopSrc(); silenceEcho(); offset = 0; ui(); });
 $('#loop').addEventListener('change', e => { loop = e.target.checked; if (src) src.loop = loop; });
 const seek = $('#seek');
 seek.addEventListener('pointerdown', () => { seeking = true; });
@@ -791,6 +829,17 @@ $('#exportBtn').addEventListener('click', () => exportAudio('wav'));
 $('#mp3Btn').addEventListener('click', () => exportAudio('mp3'));
 
 renderPill();
+// on open, quietly fetch the Moon's live distance so everyone gets the real delay without pressing Ping
+// (no sound, no animation; Ping still re-measures with the full readout and beam)
+(async () => {
+  const r = await getRange();
+  if (pinging || r.source !== 'JPL HORIZONS LIVE') return; // keep the average if NASA is unreachable, or if a Ping is already running
+  const T = 2*r.km/C_KM_S;
+  meta.delta = T - state.T; meta.km = r.km; meta.source = r.source; state.T = T;
+  if (nodes) nodes.delay.delayTime.setTargetAtTime(T, ctx.currentTime, .25);
+  pending = null; resetExportBtn();
+  renderPill();
+})();
 buildBase();
 draw(performance.now());
 requestAnimationFrame(frame);
