@@ -99,25 +99,38 @@ button{font:inherit}
 .btn:hover:not(:disabled){background:var(--fg);color:var(--ink)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn:focus-visible,#seek:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
-/* player bar: transport buttons live right next to the seek bar they control */
-.player{display:grid;gap:8px;padding:10px 12px;border:2px solid var(--line);border-radius:6px;background:var(--panel)}
+/* player bar: tape-deck style transport, right next to the seek bar it controls */
+.player{display:grid;gap:8px;padding:10px 12px;border:2px solid var(--line);border-radius:3px;background:var(--panel)}
 .deck{display:grid;grid-template-columns:auto auto 1fr auto auto;grid-template-areas:"play stop seek time loop";align-items:center;gap:10px}
-.tbtn{width:44px;height:44px;display:grid;place-items:center;padding:0;border:2px solid var(--cream);border-radius:50%;background:transparent;color:var(--cream);cursor:pointer}
+/* keys share the look of the Ping key: raised, shaded, and they press in */
+.tbtn,.loopt{border:1px solid var(--key-edge);border-radius:3px;color:var(--ink);cursor:pointer;
+  background:linear-gradient(180deg,var(--key-top),var(--key-bot));
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),0 1px 0 rgba(255,255,255,.45),0 2px 4px rgba(0,0,0,.3)}
+.tbtn{width:52px;height:40px;display:grid;place-items:center;padding:0}
 .tbtn svg{width:16px;height:16px;fill:currentColor}
-.tbtn.play{grid-area:play;background:var(--cream);color:var(--ink)}
+.tbtn .i-play{width:20px;height:20px} /* 10x10 grid at 2px per square, so it matches the stop square's weight */
+.tbtn.play{grid-area:play}
 .tbtn.stop{grid-area:stop}
-.tbtn:hover:not(:disabled){background:var(--fg);color:var(--ink)}
+.tbtn:active:not(:disabled),.tbtn.on,.loopt:active,.loopt:has(input:checked){background:linear-gradient(180deg,var(--key-bot),var(--key-top));box-shadow:inset 0 2px 5px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.45)}
 .tbtn:disabled{opacity:.4;cursor:not-allowed}
 .tbtn:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
 .tbtn .i-pause, .tbtn.on .i-play{display:none}
 .tbtn.on .i-pause{display:block}
 .deck #seek{grid-area:seek}
 .deck .time{grid-area:time}
-.loopt{grid-area:loop;position:relative;display:flex;align-items:center;gap:6px;height:32px;padding:0 9px;border:2px solid var(--line);border-radius:16px;color:var(--muted);cursor:pointer;font:700 10px/1 var(--font-px);letter-spacing:.08em;text-transform:uppercase}
-.loopt svg{width:14px;height:14px;fill:currentColor}
+.loopt{grid-area:loop;position:relative;display:flex;align-items:center;gap:7px;height:40px;padding:0 11px;font:700 10px/1 var(--font-px);letter-spacing:.08em;text-transform:uppercase}
 .loopt input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
-.loopt:has(input:checked){border-color:var(--cream);color:var(--cream)}
 .loopt:has(input:focus-visible){outline:2px solid var(--cream);outline-offset:3px}
+/* indicator light: dark when off, glowing amber when looping */
+.led{width:7px;height:7px;border-radius:50%;background:#4a3b22;box-shadow:inset 0 1px 1px rgba(0,0,0,.5)}
+.loopt:has(input:checked) .led{background:#ffb23e;box-shadow:0 0 4px 1px rgba(255,178,62,.75)}
+/* seek bar: a blocky track with a square handle, instead of the browser default */
+.deck #seek{-webkit-appearance:none;appearance:none;height:28px;background:transparent;cursor:pointer}
+.deck #seek::-webkit-slider-runnable-track{height:8px;background:var(--scr);border:1px solid var(--key-edge);border-radius:0}
+.deck #seek::-moz-range-track{height:8px;background:var(--scr);border:1px solid var(--key-edge);border-radius:0}
+.deck #seek::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:20px;margin-top:-7px;border:1px solid var(--key-edge);border-radius:2px;background:linear-gradient(180deg,var(--key-top),var(--key-bot));box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+.deck #seek::-moz-range-thumb{width:12px;height:20px;border:1px solid var(--key-edge);border-radius:2px;background:linear-gradient(180deg,var(--key-top),var(--key-bot))}
+.deck #seek:disabled{opacity:.4;cursor:not-allowed}
 @media (max-width:520px){
   .deck{grid-template-columns:auto auto 1fr auto;grid-template-areas:"play stop time loop" "seek seek seek seek"}
 }
@@ -163,17 +176,15 @@ button{font:inherit}
       <p class="fname" id="fname"></p>
       <div class="deck">
         <button class="tbtn play" id="playBtn" type="button" disabled aria-label="Play">
-          <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>
-          <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 2.5h3.2v11H3.5zM9.3 2.5h3.2v11H9.3z"/></svg>
+          <svg class="i-play" viewBox="0 0 10 10" aria-hidden="true" shape-rendering="crispEdges"><rect x="3" y="0.5" width="1" height="1"/><rect x="3" y="1.5" width="1" height="1"/><rect x="4" y="1.5" width="1" height="1"/><rect x="3" y="2.5" width="1" height="1"/><rect x="4" y="2.5" width="1" height="1"/><rect x="5" y="2.5" width="1" height="1"/><rect x="3" y="3.5" width="1" height="1"/><rect x="4" y="3.5" width="1" height="1"/><rect x="5" y="3.5" width="1" height="1"/><rect x="6" y="3.5" width="1" height="1"/><rect x="3" y="4.5" width="1" height="1"/><rect x="4" y="4.5" width="1" height="1"/><rect x="5" y="4.5" width="1" height="1"/><rect x="6" y="4.5" width="1" height="1"/><rect x="7" y="4.5" width="1" height="1"/><rect x="3" y="5.5" width="1" height="1"/><rect x="4" y="5.5" width="1" height="1"/><rect x="5" y="5.5" width="1" height="1"/><rect x="6" y="5.5" width="1" height="1"/><rect x="3" y="6.5" width="1" height="1"/><rect x="4" y="6.5" width="1" height="1"/><rect x="5" y="6.5" width="1" height="1"/><rect x="3" y="7.5" width="1" height="1"/><rect x="4" y="7.5" width="1" height="1"/><rect x="3" y="8.5" width="1" height="1"/></svg>
+          <svg class="i-pause" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/></svg>
         </button>
         <button class="tbtn stop" id="stopBtn" type="button" disabled aria-label="Stop">
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3h10v10H3z"/></svg>
+          <svg viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="4" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/></svg>
         </button>
         <input type="range" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek" disabled>
         <span class="time" id="time">0:00 / 0:00</span>
-        <label class="loopt"><input type="checkbox" id="loop" checked>
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 5h7V3l3 3-3 3V7H5v2.5H3V6a1 1 0 0 1 1-1zm8 6H5v2l-3-3 3-3v2h6V6.5h2V10a1 1 0 0 1-1 1z"/></svg>
-          <span>Loop</span></label>
+        <label class="loopt"><input type="checkbox" id="loop" checked><span class="led" aria-hidden="true"></span><span>Loop</span></label>
       </div>
     </div>
     <div class="row"><button class="btn" id="exportBtn" type="button" disabled>Export WAV</button><button class="btn" id="mp3Btn" type="button" disabled>Export MP3</button></div>
