@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Moonbounce Echo — Nick Blake</title>
-<meta name="description" content="Moonbounce Echo: an Earth-Moon-Earth delay you can play in the browser.">
+<title>Moon Bounce — Nick Blake</title>
+<meta name="description" content="Moon Bounce: an Earth-Moon-Earth delay you can play in the browser.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -47,7 +47,7 @@ button{font:inherit}
 }
 .strip{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;margin-bottom:12px}
 .brand{font:700 10px/1.2 var(--font-px);letter-spacing:.14em;text-transform:uppercase}
-.stripctl{display:flex;align-items:center;gap:8px} /* echo controls: the Original/Moon Echo switch and Clear */
+.stripctl{display:flex;align-items:center;gap:8px} /* echo controls: the Original/Moon switch and Clear */
 @media (max-width:560px){.stripctl{width:100%;justify-content:space-between}} /* phones: the mode pair on the left, Clear on the right edge */
 /* hardware keys, same treatment as Ping Moon: raised and shaded, pressed in when selected or tapped */
 .seg{display:flex;gap:6px}
@@ -156,15 +156,15 @@ button{font:inherit}
 </head>
 <body>
 <main class="page">
-  <h1 class="sr">Moonbounce Echo</h1>
+  <h1 class="sr">Moon Bounce</h1>
 
-  <section class="unit" aria-label="Moonbounce Echo">
+  <section class="unit" aria-label="Moon Bounce">
     <div class="strip">
       <div class="brand">Earth &middot; Moon &middot; Earth</div>
       <div class="stripctl">
         <div class="seg" role="group" aria-label="Listen to">
           <button id="abOrig" type="button" aria-pressed="false">Original</button>
-          <button id="abEcho" type="button" aria-pressed="true">Moon Echo</button>
+          <button id="abEcho" type="button" aria-pressed="true">Moon</button>
         </div>
         <div class="seg"><button id="clearBtn" type="button">Clear</button></div>
       </div>
@@ -595,7 +595,7 @@ let pending = null;
 function resetExportBtn(){ const b = $('#exportBtn'); if (b) b.textContent = 'Export WAV'; }
 const MIME = {wav:'audio/wav', mp3:'audio/mpeg'};
 async function saveOut(bytes, ext, what){ // what: e.g. 'your sound once, plus 12.4 s of echo tail'
-  const name = 'moonbounce-echo';
+  const name = 'moon-bounce';
   const inFrame = !!(window.claude && typeof window.claude.use === 'function');
   if (!inFrame){
     const a = document.createElement('a');
