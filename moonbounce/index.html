@@ -98,9 +98,29 @@ button{font:inherit}
 .btn.solid{background:var(--cream);color:var(--ink)}
 .btn:hover:not(:disabled){background:var(--fg);color:var(--ink)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.btn:focus-visible,.chk input:focus-visible,#seek:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
-.chk{display:flex;align-items:center;gap:8px;min-height:44px;font:700 11px/1 var(--font-px);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
-.chk input{width:18px;height:18px;accent-color:var(--cream)}
+.btn:focus-visible,#seek:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
+/* player bar: transport buttons live right next to the seek bar they control */
+.player{display:grid;gap:8px;padding:10px 12px;border:2px solid var(--line);border-radius:6px;background:var(--panel)}
+.deck{display:grid;grid-template-columns:auto auto 1fr auto auto;grid-template-areas:"play stop seek time loop";align-items:center;gap:10px}
+.tbtn{width:44px;height:44px;display:grid;place-items:center;padding:0;border:2px solid var(--cream);border-radius:50%;background:transparent;color:var(--cream);cursor:pointer}
+.tbtn svg{width:16px;height:16px;fill:currentColor}
+.tbtn.play{grid-area:play;background:var(--cream);color:var(--ink)}
+.tbtn.stop{grid-area:stop}
+.tbtn:hover:not(:disabled){background:var(--fg);color:var(--ink)}
+.tbtn:disabled{opacity:.4;cursor:not-allowed}
+.tbtn:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
+.tbtn .i-pause, .tbtn.on .i-play{display:none}
+.tbtn.on .i-pause{display:block}
+.deck #seek{grid-area:seek}
+.deck .time{grid-area:time}
+.loopt{grid-area:loop;position:relative;display:flex;align-items:center;gap:6px;height:32px;padding:0 9px;border:2px solid var(--line);border-radius:16px;color:var(--muted);cursor:pointer;font:700 10px/1 var(--font-px);letter-spacing:.08em;text-transform:uppercase}
+.loopt svg{width:14px;height:14px;fill:currentColor}
+.loopt input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
+.loopt:has(input:checked){border-color:var(--cream);color:var(--cream)}
+.loopt:has(input:focus-visible){outline:2px solid var(--cream);outline-offset:3px}
+@media (max-width:520px){
+  .deck{grid-template-columns:auto auto 1fr auto;grid-template-areas:"play stop time loop" "seek seek seek seek"}
+}
 .seekrow{display:flex;align-items:center;gap:12px}
 #seek{flex:1;min-width:0;accent-color:var(--cream);height:32px}
 .time{font:18px/1 var(--font-term);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -139,15 +159,22 @@ button{font:inherit}
       <button class="btn" id="demoBtn" type="button">Demo sound</button>
       <input id="file" type="file" accept="audio/*,.wav,.mp3,.aif,.aiff,.m4a,.ogg,.flac" hidden>
     </div>
-    <p class="fname" id="fname"></p>
-    <div class="row">
-      <button class="btn" id="playBtn" type="button" disabled>Play</button>
-      <button class="btn" id="stopBtn" type="button" disabled>Stop</button>
-      <label class="chk"><input type="checkbox" id="loop" checked> Loop</label>
-    </div>
-    <div class="seekrow">
-      <input type="range" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek" disabled>
-      <span class="time" id="time">0:00 / 0:00</span>
+    <div class="player" aria-label="Player">
+      <p class="fname" id="fname"></p>
+      <div class="deck">
+        <button class="tbtn play" id="playBtn" type="button" disabled aria-label="Play">
+          <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>
+          <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 2.5h3.2v11H3.5zM9.3 2.5h3.2v11H9.3z"/></svg>
+        </button>
+        <button class="tbtn stop" id="stopBtn" type="button" disabled aria-label="Stop">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3h10v10H3z"/></svg>
+        </button>
+        <input type="range" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek" disabled>
+        <span class="time" id="time">0:00 / 0:00</span>
+        <label class="loopt"><input type="checkbox" id="loop" checked>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 5h7V3l3 3-3 3V7H5v2.5H3V6a1 1 0 0 1 1-1zm8 6H5v2l-3-3 3-3v2h6V6.5h2V10a1 1 0 0 1-1 1z"/></svg>
+          <span>Loop</span></label>
+      </div>
     </div>
     <div class="row"><button class="btn" id="exportBtn" type="button" disabled>Export WAV</button><button class="btn" id="mp3Btn" type="button" disabled>Export MP3</button></div>
     <p class="msg" id="msg" role="status" aria-live="polite"></p>
@@ -415,16 +442,20 @@ function silenceEcho(){
   old.master.gain.linearRampToValueAtTime(0, t + .03);
   nodes = buildGraph(ctx); applyTo(nodes, ctx, state, true); driftTo = 0; topUpDrift();
   echoLvl = 0; echoAim = 0; // the echo beams on the screen go dark at once, matching the silence
+  setTimeout(() => retire(old), 80);
+}
+function retire(n){
+  try { const t = ctx.currentTime; n.master.gain.cancelScheduledValues(t); n.master.gain.setValueAtTime(n.master.gain.value, t); n.master.gain.linearRampToValueAtTime(0, t + .03); } catch (e) {}
   setTimeout(() => {
-    for (const k of ['dopSrc', 'fadeSrc', 'noise', 'nlfo']) { try { old[k].stop(); } catch (e) {} }
-    try { old.comp.disconnect(); } catch (e) {}
-  }, 80);
+    for (const k of ['dopSrc', 'fadeSrc', 'noise', 'nlfo']) { try { n[k].stop(); } catch (e) {} }
+    try { n.comp.disconnect(); } catch (e) {}
+  }, 60);
 }
 function ui(){
   const has = !!fileBuf;
   $('#playBtn').disabled = !has; $('#stopBtn').disabled = !has; $('#seek').disabled = !has;
   $('#exportBtn').disabled = !has && !pending; $('#mp3Btn').disabled = !has || !!pending;
-  $('#playBtn').textContent = playing ? 'Pause' : 'Play';
+  $('#playBtn').classList.toggle('on', playing); $('#playBtn').setAttribute('aria-label', playing ? 'Pause' : 'Play');
   const dur = has ? fileBuf.duration : 0, p = has ? pos() : 0;
   $('#time').textContent = fmtT(p) + ' / ' + fmtT(dur);
   if (!seeking) $('#seek').value = dur ? Math.round(p/dur*1000) : 0;
@@ -464,23 +495,28 @@ async function ping(){
   const btn = $('#ping'); btn.disabled = true; btn.classList.add('on');
   ensureAudio();
   const rp = getRange();
+  // send first, like real radar: the blip and the beam leave the moment you press
+  if (nodes && !playing) blip();
+  if (state.echoOn) transmit(); // Original mode: no echo, so no beam either (the distance is still measured)
+  const sent = performance.now();
   termEl.textContent = ''; termEl.hidden = false; pillEl.hidden = true;
   await typeLine('> pinging the moon...');
-  await sleep(reduced ? 0 : 350);
   await typeLine('> getting ephemeris...');
   const r = await rp;
   const T = 2*r.km/C_KM_S;
   meta.delta = T - state.T; meta.km = r.km; meta.source = r.source; state.T = T;
   if (nodes) nodes.delay.delayTime.setTargetAtTime(T, ctx.currentTime, .25);
+  if (tx) tx.dur = T*1000; // the beam lands in step with the measured delay
   pending = null; resetExportBtn();
-  await typeLine('> src: ' + r.source.toLowerCase());
-  await typeLine('> delta: ' + fmtDelta(meta.delta));
+  // the result prints as the echo arrives back at the dish
+  const wait = sent + T*1000 - performance.now();
+  if (!reduced && wait > 0) await sleep(wait);
   await typeLine('> time: ' + T.toFixed(5) + ' sec');
+  await typeLine('> delta: ' + fmtDelta(meta.delta));
+  await typeLine('> src: ' + r.source.toLowerCase());
   const last = termLine(); last.appendChild(document.createTextNode('> ')); moveCursor(last);
   await sleep(reduced ? 300 : 1000);
   renderPill(); termEl.hidden = true; pillEl.hidden = false;
-  if (nodes && !playing) blip();
-  transmit();
   btn.disabled = false; btn.classList.remove('on'); pinging = false;
 }
 
@@ -737,7 +773,6 @@ function draw(now){
     const ph = reduced ? .25 : (((now - echoT0) / (state.T*1000)) % 1 + 1) % 1;
     const p = ph < .5 ? lerpP(tipL, b1, ph*2) : lerpP(a2, tipR, (ph-.5)*2);
     rect(p.x-1, p.y-1, k > .35 ? 3 : 2, k > .35 ? 3 : 2, c);
-    if (!reduced && Math.abs(ph-.5) < .04) for (let an=0; an<6.28; an+=.28) dot(MOON.x + Math.cos(an)*(MOON.r+4), MOON.y + Math.sin(an)*(MOON.r+4), c);
   }
   if (!tx) return;
   const half = tx.dur/2, dur = tx.dur;
