@@ -47,10 +47,13 @@ button{font:inherit}
 }
 .strip{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;margin-bottom:12px}
 .brand{font:700 10px/1.2 var(--font-px);letter-spacing:.14em;text-transform:uppercase}
-.seg{display:flex;border:2px solid var(--ink);border-radius:3px;overflow:hidden}
-.seg button{min-height:40px;padding:0 12px;border:0;background:transparent;color:var(--ink);cursor:pointer;font:700 10px/1 var(--font-px);letter-spacing:.1em;text-transform:uppercase}
-.seg button+button{border-left:2px solid var(--ink)}
-.seg button[aria-pressed="true"]{background:var(--ink);color:var(--cream)}
+.stripctl{display:flex;align-items:center;gap:8px} /* echo controls: the Original/Moon Echo switch and Clear */
+/* hardware keys, same treatment as Ping Moon: raised and shaded, pressed in when selected or tapped */
+.seg{display:flex;gap:6px}
+.seg button{min-height:40px;padding:0 12px;border:1px solid var(--key-edge);border-radius:3px;color:var(--ink);cursor:pointer;font:700 10px/1 var(--font-px);letter-spacing:.1em;text-transform:uppercase;
+  background:linear-gradient(180deg,var(--key-top),var(--key-bot));
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),0 1px 0 rgba(255,255,255,.45),0 2px 4px rgba(0,0,0,.3)}
+.seg button[aria-pressed="true"],#clearBtn:active{background:linear-gradient(180deg,var(--key-bot),var(--key-top));box-shadow:inset 0 2px 5px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.45)} /* pressed: exactly like Ping Moon when pressed */
 .seg button:focus-visible,.ping:focus-visible,.knob:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 
 .bezel{padding:10px;border-radius:18px;background:linear-gradient(160deg,var(--plate-lo),var(--plate));
@@ -100,7 +103,14 @@ button{font:inherit}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn:focus-visible,#seek:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
 /* player bar: flat retro controls in the same style as Load audio / Export, right next to the seek bar */
-.player{display:grid;gap:8px;padding:10px 12px;border:2px solid var(--line);border-radius:2px;background:var(--panel)}
+.player{position:relative;display:grid;gap:10px;padding:16px 12px 10px;border:2px solid var(--line);border-radius:2px;background:var(--panel)}
+/* the player feeds the device: an INPUT tab on the frame, and a dotted signal line up into the device above */
+.player::after{content:"Input";position:absolute;top:-8px;left:12px;padding:0 6px;background:var(--bg);color:var(--muted);font:700 9px/14px var(--font-px);letter-spacing:.14em;text-transform:uppercase}
+.player::before{content:"";position:absolute;left:50%;bottom:100%;width:2px;height:26px;margin-left:-1px;opacity:.3;
+  background:repeating-linear-gradient(0deg,var(--cream) 0 2px,transparent 2px 6px)}
+.player.live::before{opacity:1;animation:feed .5s linear infinite} /* dots flow up into the device while your music is being sent */
+@keyframes feed{to{background-position:0 -6px}}
+@media (prefers-reduced-motion:reduce){.player.live::before{animation:none}}
 .deck{display:grid;grid-template-columns:auto auto 1fr auto auto;grid-template-areas:"play stop seek time loop";align-items:center;gap:10px}
 /* same look as .btn: 2px cream outline, square corners, no shading */
 .tbtn,.loopt{min-height:44px;border:2px solid var(--cream);border-radius:2px;background:transparent;color:var(--cream);cursor:pointer}
@@ -147,9 +157,12 @@ button{font:inherit}
   <section class="unit" aria-label="Moonbounce Echo">
     <div class="strip">
       <div class="brand">Earth &middot; Moon &middot; Earth</div>
-      <div class="seg" role="group" aria-label="Listen to">
-        <button id="abOrig" type="button" aria-pressed="false">Original</button>
-        <button id="abEcho" type="button" aria-pressed="true">Moon Echo</button>
+      <div class="stripctl">
+        <div class="seg" role="group" aria-label="Listen to">
+          <button id="abOrig" type="button" aria-pressed="false">Original</button>
+          <button id="abEcho" type="button" aria-pressed="true">Moon Echo</button>
+        </div>
+        <div class="seg"><button id="clearBtn" type="button">Clear</button></div>
       </div>
     </div>
     <div class="bezel">
@@ -164,12 +177,12 @@ button{font:inherit}
   </section>
 
   <section class="panel" aria-label="Transport">
-    <div class="row">
-      <button class="btn solid" id="loadBtn" type="button">Load audio</button>
-      <button class="btn" id="demoBtn" type="button">Demo sound</button>
-      <input id="file" type="file" accept="audio/*,.wav,.mp3,.aif,.aiff,.m4a,.ogg,.flac" hidden>
-    </div>
     <div class="player" aria-label="Player">
+      <div class="row">
+        <button class="btn solid" id="loadBtn" type="button">Load audio</button>
+        <button class="btn" id="demoBtn" type="button">Demo sound</button>
+        <input id="file" type="file" accept="audio/*,.wav,.mp3,.aif,.aiff,.m4a,.ogg,.flac" hidden>
+      </div>
       <p class="fname" id="fname"></p>
       <div class="deck">
         <button class="tbtn play" id="playBtn" type="button" disabled aria-label="Play">
@@ -736,6 +749,7 @@ function leg(a, b, q){
 }
 let tx = null;
 const meterBuf = new Float32Array(512); let echoLvl = 0;
+const playerEl = document.querySelector('.player');
 let shoot = null, nextShoot = performance.now() + 2500;
 let echoT0 = 0, echoAim = 0;
 function transmit(){ tx = {t0:performance.now(), dur:state.T*1000}; echoT0 = tx.t0; }
@@ -763,6 +777,7 @@ function draw(now){
     echoLvl = Math.max(Math.sqrt(sum/meterBuf.length), echoLvl*.85);
   } else echoLvl = 0;
   const echoing = state.echoOn && echoLvl > .003; // animation is for your music's echo only (not Ping, not Original mode)
+  if (playerEl) playerEl.classList.toggle('live', playing && state.echoOn); // the signal line into the device
   echoAim += ((echoing ? 1 : 0) - echoAim) * .15; // dishes stay pointed at the Moon while the echo is audible
   const f = Math.max(tx ? ease(el/300) * (1 - ease((el - tx.dur - 500)/400)) : 0, ease(echoAim));
   const sway = reduced ? 0 : .035*Math.sin(now/2300);
@@ -851,7 +866,8 @@ $('#demoBtn').addEventListener('click', async () => {
   catch (err){ msg('Could not build the demo sound in this browser.'); }
 });
 $('#playBtn').addEventListener('click', () => { if (playing) pause(); else play(); });
-$('#stopBtn').addEventListener('click', () => { stopSrc(); silenceEcho(); offset = 0; ui(); });
+$('#stopBtn').addEventListener('click', () => { stopSrc(); offset = 0; ui(); }); // stop + rewind the track; the echo rings out
+$('#clearBtn').addEventListener('click', () => { if (ctx) silenceEcho(); }); // the device's Clear key silences the echo at once
 $('#loop').addEventListener('change', e => { loop = e.target.checked; if (src) src.loop = loop; });
 const seek = $('#seek');
 seek.addEventListener('pointerdown', () => { seeking = true; });
