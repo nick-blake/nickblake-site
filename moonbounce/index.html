@@ -865,7 +865,7 @@ $('#demoBtn').addEventListener('click', async () => {
 });
 $('#playBtn').addEventListener('click', () => { if (playing) pause(); else play(); });
 $('#stopBtn').addEventListener('click', () => { stopSrc(); offset = 0; ui(); }); // stop + rewind the track; the echo rings out
-$('#clearBtn').addEventListener('click', () => { if (ctx) silenceEcho(); }); // the device's Clear key silences the echo at once
+$('#clearBtn').addEventListener('click', () => { pause(); if (ctx) silenceEcho(); }); // Clear: total silence (the track pauses where it is, the echo is cut)
 $('#loop').addEventListener('change', e => { loop = e.target.checked; if (src) src.loop = loop; });
 const seek = $('#seek');
 seek.addEventListener('pointerdown', () => { seeking = true; });
