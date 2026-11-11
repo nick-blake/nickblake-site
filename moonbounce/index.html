@@ -182,7 +182,7 @@ function lunarDistanceKm(date){
 async function fetchJPL(signal){
   const now = new Date(), stop = new Date(now.getTime()+60000);
   const f = d => encodeURIComponent(d.toISOString().slice(0,16).replace('T',' '));
-  const url = 'https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27500@399%27'
+  const url = '/api/horizons?format=json&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27500@399%27'
     + '&START_TIME=%27' + f(now) + '%27&STOP_TIME=%27' + f(stop) + '%27&STEP_SIZE=%271m%27&QUANTITIES=%2720%27';
   const res = await fetch(url, {signal});
   if (!res.ok) throw new Error('http ' + res.status);
