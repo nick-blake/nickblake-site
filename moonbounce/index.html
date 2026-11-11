@@ -323,8 +323,8 @@ function unlockIOS(){
   if (!silentEl){
     silentEl = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAAAA');
     silentEl.loop = true; silentEl.setAttribute('playsinline', '');
-    const p = silentEl.play(); if (p && p.catch) p.catch(() => {});
   }
+  if (silentEl.paused){ const p = silentEl.play(); if (p && p.catch) p.catch(() => {}); } // retried on each tap until it sticks
   if (ctx){
     if (ctx.state !== 'running') ctx.resume(); // also wakes it after a phone call or switching apps ("interrupted")
     const b = ctx.createBuffer(1, 1, 22050), s = ctx.createBufferSource(); // a silent blip, started inside the tap
@@ -726,14 +726,47 @@ function setAB(echo){
 }
 $('#abEcho').addEventListener('click', () => setAB(true));
 $('#abOrig').addEventListener('click', () => setAB(false));
+/* ---------- remember the last uploaded sound (stored only in this browser, with IndexedDB) ---------- */
+const saved = (() => {
+  const open = () => new Promise((res, rej) => {
+    if (!window.indexedDB) return rej(new Error('no storage'));
+    const r = indexedDB.open('moonbounce', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('sounds');
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+  const run = (mode, fn) => open().then(db => new Promise((res, rej) => {
+    const tx = db.transaction('sounds', mode), req = fn(tx.objectStore('sounds'));
+    tx.oncomplete = () => { db.close(); res(req && req.result); }; tx.onerror = tx.onabort = () => { db.close(); rej(tx.error); };
+  }));
+  return {
+    put: v => run('readwrite', st => st.put(v, 'last')),
+    get: () => run('readonly', st => st.get('last')),
+    clear: () => run('readwrite', st => st.delete('last')),
+  };
+})();
+(async () => {
+  let last = null;
+  try { last = await saved.get(); } catch (e) { return; }
+  if (!last || !last.bytes || fileBuf) return;
+  try {
+    if (!ensureAudio()) return;
+    setFile(await ctx.decodeAudioData(last.bytes.slice(0)), last.name);
+    msg('Restored your last sound. Press play to hear it.');
+  } catch (e) { try { await saved.clear(); } catch (_) {} }
+})();
+
 $('#loadBtn').addEventListener('click', () => { ensureAudio(); $('#file').click(); });
 $('#file').addEventListener('change', async e => {
   const f = e.target.files && e.target.files[0];
   e.target.value = '';
   if (!f || !ensureAudio()) return;
   msg('Reading ' + f.name + '...');
-  try { setFile(await ctx.decodeAudioData(await f.arrayBuffer()), f.name); }
-  catch (err){ msg('That file could not be decoded. Try WAV, MP3 or M4A. AIFF only works in some browsers.'); }
+  let bytes;
+  try { bytes = await f.arrayBuffer(); setFile(await ctx.decodeAudioData(bytes.slice(0)), f.name); }
+  catch (err){ msg('That file could not be decoded. Try WAV, MP3 or M4A. AIFF only works in some browsers.'); return; }
+  // keep a copy in this browser so it's still here after a refresh (never uploaded anywhere)
+  try { await saved.put({name: f.name, bytes}); } // replaces any earlier saved sound
+  catch (err){ msg('This file is too large to keep after a refresh in this browser.'); }
 });
 $('#demoBtn').addEventListener('click', async () => {
   ensureAudio();
