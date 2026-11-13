@@ -130,6 +130,9 @@
   /* media with its own solid background that shouldn't be cropped: fitted whole, on a frame of the same color */
   .frame.fit { padding: 0; }
   .frame.fit > .media { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; border-radius: 0; box-shadow: none; }
+  /* a recording whose browser window is narrower than the others: a taller frame, so the window shows at the same
+     width as the other SimpleReport videos with the whole window in view, top to bottom */
+  .frame.tall { aspect-ratio: 1556 / 1200; }
   /* each project can tint its frames to match its own screenshots */
   #simplereport { --frame: #eef1f6; }
   /* images with their own rounded, see-through corners: a shadow that follows their actual shape */
@@ -254,9 +257,9 @@
         alt="Results dashboard filtered to HIV: a table of test results with patient, result badge, date and time, facility, device and who submitted it, plus filters, pagination and a Download results button.">
     </figure>
 
-    <figure class="frame">
-      <img class="media" src="/work/media/simplereport/manage-facilities.png" width="3200" height="2518" loading="lazy" decoding="async"
-        alt="Manage facilities settings for MetroHealth Central Clinic: the facility address card, and a Testing devices list filtered to RSV with one of four devices switched on.">
+    <figure class="frame fill tall">
+      <video class="media" data-src="/work/media/simplereport/add-devices.mp4" poster="/work/media/simplereport/add-devices-poster.jpg"
+        width="1920" height="1200" muted loop playsinline preload="none" aria-label="Adding testing devices to a facility in SimpleReport's Manage facilities settings"></video>
     </figure>
 
     <p class="small">I scaled and maintained our design system, built on USWDS (the U.S. Web Design System), working closely with engineering. This helped my team add new disease testing workflows with ease.</p>
