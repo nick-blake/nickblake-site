@@ -186,7 +186,16 @@
   /* stand-in until the real image arrives */
   .ph { color: var(--muted); font-size: 13px; text-align: center; }
 
+  /* process case study link (ready for when the Figma decks are): on its own line, tucked under a paragraph
+     (closer than the usual 64px gap), styled like the Shake Shack / Skylight links but medium weight. Add it as:
+     <p class="case"><a href="[Figma link]" target="_blank" rel="noopener">Process case study (Figma) ↗</a></p> */
+  .project > p.case { margin-top: -40px; padding-bottom: 8px; }
+  /* two blurbs in a row read as one block of text: one line's space between them instead of the 64px gap */
+  .project > p.big + p.small { margin-top: -40px; }
+  .case a { color: var(--fg); font-weight: 500; white-space: nowrap; }
+
   @media (max-width: 700px) {
+    .project > p.case, .project > p.big + p.small { margin-top: -20px; }
     .project { gap: 40px; }
     .project + .project { margin-top: 80px; }
     .project + .project::before { margin-bottom: 40px; }
@@ -258,12 +267,12 @@
 
   <!-- ===== Shake Shack ===== -->
   <article class="project" id="shake-shack">
-    <p class="big">Shake Shack is modernizing its technology as it grows from <span class="m">650+</span> toward <span class="m">1,500</span> locations, rebuilding how guests order and how teams run each Shack.</p>
-
     <figure class="frame fill">
       <img class="media" src="/work/media/shake-shack/kiosk-astor-place.webp" width="1500" height="844" loading="lazy" decoding="async"
         alt="A customer ordering on a Shake Shack self-service kiosk at the Astor Place restaurant, with burgers on the touchscreen menu.">
     </figure>
+
+    <p class="big">Shake Shack is modernizing its technology as it grows from <span class="m">650+</span> toward <span class="m">1,500</span> locations, rebuilding how guests order and how teams run each Shack.</p>
 
     <p class="small">I designed across Shake Shack’s mobile app, in-store kiosk and internal operations tools, on the Technology team. My work covered guest ordering flows and the staff-facing tools that keep service running smoothly.</p>
 
@@ -280,24 +289,24 @@
 
   <!-- ===== USCIS ===== -->
   <article class="project" id="uscis">
-    <p class="big">Asylum officers at U.S. Citizenship and Immigration Services decide whether people fleeing danger can stay in the United States. Those decisions are made in interviews, and officers completed more than <span class="m">51,500</span> screening interviews in the first eight months of fiscal year 2020 alone.</p>
-
     <figure class="frame fill">
       <video class="media" data-src="/work/media/uscis/country-events.mp4" poster="/work/media/uscis/country-events-poster.jpg"
         width="1440" height="900" muted loop playsinline preload="none" aria-label="Searching documented country events for an asylum case: filtering events in Honduras by location and group, then searching for kidnap"></video>
     </figure>
+
+    <p class="big">Asylum officers at U.S. Citizenship and Immigration Services decide whether people fleeing danger can stay in the United States. Those decisions are made in interviews, and officers completed more than <span class="m">51,500</span> screening interviews in the first eight months of fiscal year 2020 alone.</p>
 
     <p class="small">I joined as a Civic Digital Fellow through Coding it Forward and turned a basic data capture tool into an integrated case interview system for refugee and asylum officers. Streamlining multi-step data entry cut information lookup time by <span class="m">45%</span>, saved <span class="m">20 minutes</span> per task and reduced the case backlog by <span class="m">23%</span>.</p>
   </article>
 
   <!-- ===== mayk.it ===== -->
   <article class="project" id="mayk">
-    <p class="big">The mobile app mayk.it is a simple music studio on your iPhone, used by amateur artists to make songs that go viral on TikTok. Its creators have made <span class="m">hundreds of thousands</span> of songs, with <span class="m">billions</span> of plays across social media.</p>
-
     <figure class="frame">
       <img class="media cutout" src="/work/media/mayk/studio-voice-fx.png" width="729" height="1475" loading="lazy" decoding="async"
         alt="mayk.it studio on iPhone: a recording timeline above a grid of Voice FX presets including nofilter, MagicTune, mayktune, Custom, Pro, Temple, Radio, Harmonizer and Robot.">
     </figure>
+
+    <p class="big">The mobile app mayk.it is a simple music studio on your iPhone, used by amateur artists to make songs that go viral on TikTok. Its creators have made <span class="m">hundreds of thousands</span> of songs, with <span class="m">billions</span> of plays across social media.</p>
 
     <p class="small">I joined shortly after they closed a <span class="m">$4 million</span> seed round. I audited the app, interviewed new users and dug into analytics to find where first-time creators were dropping off, then redesigned onboarding to get people to their first song faster, boosting song completion <span class="m">35%</span> and Day 1 retention <span class="m">28%</span>.</p>
 
@@ -313,11 +322,11 @@
   <!--
   ===== Placeholder slots for future projects =====
   Copy one of these out of the comment and fill it in. Same order as SimpleReport:
-  big blurb, hero media, small blurb, then more media. Every image or video goes inside a <figure class="frame">.
+  hero media, big blurb, small blurb, then more media. Every image or video goes inside a <figure class="frame">.
 
   <article class="project" id="project-2">
-    <p class="big">[Big blurb]</p>
     <figure class="frame"><video class="media" data-src="/work/media/project-2/hero.mp4" poster="/work/media/project-2/hero-poster.jpg" width="1920" height="1200" muted loop playsinline preload="none"></video></figure>
+    <p class="big">[Big blurb]</p>
     <p class="small">[Small blurb]</p>
     <figure class="frame"><img class="media" src="/work/media/project-2/1.jpg" alt="[describe the image]" width="1920" height="1200" loading="lazy" decoding="async"></figure>
   </article>
@@ -470,16 +479,17 @@
   });
 
   // Videos: muted, looping and inline. Ones further down the page only download when they get close to the screen.
-  // People who've asked their device to reduce motion get the poster frame with play controls instead of autoplay.
+  // People who've asked their device to reduce motion see the still poster frame instead (no autoplay); click to enlarge still plays it.
+  // Videos never show playback controls.
   (() => {
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const vids = [...document.querySelectorAll('video.media')];
     const start = v => {
       if (v.dataset.src) { v.src = v.dataset.src; delete v.dataset.src; }
-      if (reduce) { v.controls = true; return; }
-      const p = v.play(); if (p && p.catch) p.catch(() => { v.controls = true; });
+      if (reduce) return;
+      const p = v.play(); if (p && p.catch) p.catch(() => {}); // if the browser blocks autoplay, the poster frame stays
     };
-    if (reduce) vids.forEach(v => { v.removeAttribute('autoplay'); v.pause(); v.controls = true; });
+    if (reduce) vids.forEach(v => { v.removeAttribute('autoplay'); v.pause(); });
     const io = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
       for (const e of entries) {
         const v = e.target;
