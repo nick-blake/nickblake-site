@@ -133,8 +133,6 @@
   /* a recording whose browser window is narrower than the others: a taller frame, so the window shows at the same
      width as the other SimpleReport videos with the whole window in view, top to bottom */
   .frame.tall { aspect-ratio: 1556 / 1200; }
-  /* a recording whose own background is almost the page color: dimmed a touch so its frame stands out from the page */
-  .frame > .media.dim { filter: brightness(.95); }
   /* each project can tint its frames to match its own screenshots */
   #simplereport { --frame: #eef1f6; }
   /* images with their own rounded, see-through corners: a shadow that follows their actual shape */
@@ -275,7 +273,7 @@
   <!-- ===== Shake Shack ===== -->
   <article class="project" id="shake-shack">
     <figure class="frame fill">
-      <video class="media dim" data-src="/work/media/shake-shack/spark.mp4" poster="/work/media/shake-shack/spark-poster.jpg"
+      <video class="media" data-src="/work/media/shake-shack/spark.mp4" poster="/work/media/shake-shack/spark-poster.jpg"
         width="1920" height="1200" muted loop playsinline preload="none" aria-label="Spark, an operations dashboard for Shake Shack managers: switching from today's hospitality metrics to this week's, then marking a recommended action done"></video>
     </figure>
 
