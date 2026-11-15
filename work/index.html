@@ -133,6 +133,8 @@
   /* a recording whose browser window is narrower than the others: a taller frame, so the window shows at the same
      width as the other SimpleReport videos with the whole window in view, top to bottom */
   .frame.tall { aspect-ratio: 1556 / 1200; }
+  /* a recording whose own background is almost the page color: dimmed a touch so its frame stands out from the page */
+  .frame > .media.dim { filter: brightness(.95); }
   /* each project can tint its frames to match its own screenshots */
   #simplereport { --frame: #eef1f6; }
   /* images with their own rounded, see-through corners: a shadow that follows their actual shape */
@@ -273,13 +275,15 @@
   <!-- ===== Shake Shack ===== -->
   <article class="project" id="shake-shack">
     <figure class="frame fill">
-      <img class="media" src="/work/media/shake-shack/kiosk-astor-place.webp" width="1500" height="844" loading="lazy" decoding="async"
-        alt="A customer ordering on a Shake Shack self-service kiosk at the Astor Place restaurant, with burgers on the touchscreen menu.">
+      <video class="media dim" data-src="/work/media/shake-shack/spark.mp4" poster="/work/media/shake-shack/spark-poster.jpg"
+        width="1920" height="1200" muted loop playsinline preload="none" aria-label="Spark, an operations dashboard for Shake Shack managers: switching from today's hospitality metrics to this week's, then marking a recommended action done"></video>
     </figure>
 
     <p class="big">Shake Shack is modernizing its technology as it grows from <span class="m">650+</span> toward <span class="m">1,500</span> locations, rebuilding how guests order and how teams run each Shack.</p>
 
     <p class="small">I designed across Shake Shack’s mobile app, in-store kiosk and internal operations tools, on the Technology team. My work covered guest ordering flows and the staff-facing tools that keep service running smoothly.</p>
+
+    <p class="case"><a href="#shake-shack-case-study" target="_blank" rel="noopener">Case Study (Figma) ↗</a></p>
 
     <figure class="frame fit" style="--frame: #000">
       <video class="media" data-src="/work/media/shake-shack/kiosk-animation.mp4" poster="/work/media/shake-shack/kiosk-animation-poster.jpg"
@@ -289,6 +293,11 @@
     <figure class="frame fill">
       <video class="media" data-src="/work/media/shake-shack/mobile-app.mp4" poster="/work/media/shake-shack/mobile-app-poster.jpg"
         width="1220" height="686" muted loop playsinline preload="none" aria-label="Ordering a ShackBurger in the Shake Shack app: browsing burgers, choosing a double, adding bacon and customizing toppings"></video>
+    </figure>
+
+    <figure class="frame fill">
+      <img class="media" src="/work/media/shake-shack/kiosk-astor-place.webp" width="1500" height="844" loading="lazy" decoding="async"
+        alt="A customer ordering on a Shake Shack self-service kiosk at the Astor Place restaurant, with burgers on the touchscreen menu.">
     </figure>
   </article>
 
