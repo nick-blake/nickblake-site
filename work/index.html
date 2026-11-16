@@ -156,7 +156,11 @@
   .frame[data-zoom]:focus-visible { outline: 2px solid var(--link); outline-offset: 4px; }
   .lightbox {
     position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
-    padding: max(16px, 4vmin); background: color-mix(in srgb, var(--bg) 94%, transparent);
+    /* room around the enlarged view: the top and bottom keep a band clear for "Close" (its 34px height + 14px gap below it),
+       so the button never sits on the image; both edges get it, so the image stays centered */
+    --lb-x: max(16px, 4vmin);
+    --lb-y: max(4vmin, max(16px, env(safe-area-inset-top, 0px)) + 34px + 14px);
+    padding: var(--lb-y) var(--lb-x); background: color-mix(in srgb, var(--bg) 94%, transparent);
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
     cursor: zoom-out; opacity: 0; transition: opacity .2s ease;
   }
@@ -164,14 +168,14 @@
   .lightbox .lb-media {
     display: block; width: auto; height: auto; object-fit: contain; border-radius: 6px;
     /* as big as the screen allows, minus the padding around it */
-    max-width: calc(100vw - 2 * max(16px, 4vmin));
-    max-height: calc(100vh - 2 * max(16px, 4vmin)); max-height: calc(100dvh - 2 * max(16px, 4vmin));
+    max-width: calc(100vw - 2 * var(--lb-x));
+    max-height: calc(100vh - 2 * var(--lb-y)); max-height: calc(100dvh - 2 * var(--lb-y));
   }
   .lightbox .lb-duo { display: flex; gap: max(16px, 3vw); align-items: center; justify-content: center; }
   .lightbox .lb-duo img {
     display: block; width: auto; height: auto; object-fit: contain;
-    max-height: calc(100vh - 2 * max(16px, 4vmin)); max-height: calc(100dvh - 2 * max(16px, 4vmin));
-    max-width: calc((100vw - 2 * max(16px, 4vmin) - max(16px, 3vw)) / 2);
+    max-height: calc(100vh - 2 * var(--lb-y)); max-height: calc(100dvh - 2 * var(--lb-y));
+    max-width: calc((100vw - 2 * var(--lb-x) - max(16px, 3vw)) / 2);
   }
   .lightbox .lb-close {
     position: absolute; top: max(16px, env(safe-area-inset-top, 0px)); right: max(20px, env(safe-area-inset-right, 0px));
@@ -180,6 +184,30 @@
   .lightbox .lb-close:hover { color: var(--fg); }
   .lightbox .lb-close:focus { outline: none; }
   .lightbox .lb-close:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 2px; }
+  /* images with see-through backgrounds (cutouts, e.g. the mayk.it phones) are enlarged on their frame's color,
+     the same backdrop they have on the page; the media sizes shrink by the panel's padding so it all still fits */
+  .lightbox .lb-panel { --pp: clamp(20px, 5vmin, 56px); padding: var(--pp); border-radius: 14px; }
+  .lightbox .lb-panel > .lb-media {
+    max-width: calc(100vw - 2 * var(--lb-x) - 2 * var(--pp));
+    max-height: calc(100vh - 2 * var(--lb-y) - 2 * var(--pp)); max-height: calc(100dvh - 2 * var(--lb-y) - 2 * var(--pp));
+  }
+  .lightbox .lb-panel > .lb-duo img {
+    max-height: calc(100vh - 2 * var(--lb-y) - 2 * var(--pp)); max-height: calc(100dvh - 2 * var(--lb-y) - 2 * var(--pp));
+    max-width: calc((100vw - 2 * var(--lb-x) - 2 * var(--pp) - max(16px, 3vw)) / 2);
+  }
+  .lightbox .lb-panel .cutout { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .05)) drop-shadow(0 10px 22px rgba(0, 0, 0, .07)); }
+  /* on landscape screens the panel is as big as an enlarged SimpleReport or USCIS video (16:10, filling the screen),
+     with the images centered inside it; on portrait screens (phones) it hugs the images so they stay as large as possible */
+  @media (min-aspect-ratio: 1/1) {
+    .lightbox .lb-panel {
+      --pw: min(100vw - 2 * var(--lb-x), (100vh - 2 * var(--lb-y)) * 1.6);
+      --pw: min(100vw - 2 * var(--lb-x), (100dvh - 2 * var(--lb-y)) * 1.6);
+      --ph: calc(var(--pw) / 1.6);
+      width: var(--pw); height: var(--ph); display: flex; align-items: center; justify-content: center;
+    }
+    .lightbox .lb-panel > .lb-media { max-width: calc(var(--pw) - 2 * var(--pp)); max-height: calc(var(--ph) - 2 * var(--pp)); }
+    .lightbox .lb-panel > .lb-duo img { max-height: calc(var(--ph) - 2 * var(--pp)); max-width: calc((var(--pw) - 2 * var(--pp) - max(16px, 3vw)) / 2); }
+  }
   .lb-lock { overflow: hidden; }
   @media (prefers-reduced-motion: reduce) { .lightbox { transition: none; } }
 
@@ -331,6 +359,21 @@
     </figure>
   </article>
 
+  <!-- ===== Moon Bounce ===== -->
+  <article class="project" id="moonbounce">
+    <!-- the same warm gray as the other frames (#e9e8e1), one step darker so the beige device stands out from the page -->
+    <figure class="frame" style="--frame: #dedcd3">
+      <img class="media cutout" src="/work/media/moonbounce/device.png" width="1320" height="1882" loading="lazy" decoding="async"
+        alt="Moon Bounce: a beige hardware-style device with a pixel screen showing two radio dishes and the Moon, a readout of the live Earth–Moon–Earth delay from NASA JPL Horizons, a Ping Moon key, four knobs (Feedback, Doppler, Moon Dust, Mix) and a player with the demo sound loaded.">
+    </figure>
+
+    <p class="big">A browser instrument that bounces your sound off the Moon. Load any audio, ping the Moon, and hear it come back after the real Earth–Moon–Earth round trip, a delay of about <span class="m">2.5 seconds</span>.</p>
+
+    <p class="small">The delay comes from that day’s distance to the Moon, taken live from NASA/JPL Horizons, with Doppler shift, feedback and signal noise layered on top. Designed and built it with Claude Code. Inspired by Moon Echo by AudioThing × Hainbach.</p>
+
+    <p class="case"><a href="/moonbounce/" target="_blank" rel="noopener">Try Moon Bounce ↗</a></p>
+  </article>
+
   <!--
   ===== Placeholder slots for future projects =====
   Copy one of these out of the comment and fill it in. Same order as SimpleReport:
@@ -462,6 +505,14 @@
         big.src = m.currentSrc || m.src; big.alt = m.alt || '';
       }
       if (!big.className) big.className = 'lb-media';
+      // see-through images keep their frame's color behind them, as on the page
+      if (frame.querySelector('.media.cutout')) {
+        if (big.tagName === 'IMG') big.classList.add('cutout'); else big.querySelectorAll('img').forEach(i => i.classList.add('cutout'));
+        const panel = document.createElement('div');
+        panel.className = 'lb-panel';
+        panel.style.background = getComputedStyle(frame).backgroundColor;
+        panel.append(big); big = panel;
+      }
       const btn = document.createElement('button');
       btn.className = 'lb-close'; btn.type = 'button'; btn.textContent = 'Close';
       box.append(big, btn);
