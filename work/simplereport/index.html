@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SimpleReport — Nick Blake</title>
+<meta name="description" content="SimpleReport: helping health workers send rapid test results to the CDC. A case study by Nick Blake.">
+<meta name="robots" content="noindex, nofollow"><!-- unlisted, like /work: only people with the link should find this page -->
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap">
+<!-- Vercel Web Analytics (only runs on the live site) -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  /* Case study: the same type, colors and column as /work (Geist Mono, 16px, the 42rem text column).
+     One column top to bottom; slides sit full width in it, in the same rounded frames as /work. */
+  :root {
+    --bg: #f5f5f1; --fg: #2b2620; --muted: #6d6a5e; --link: #8a4b2a; --line: rgba(43, 38, 32, .14);
+    --frame: #e9e8e1;
+    --font: "Geist Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1b2330; --fg: #ece6da; --muted: #a59f92; --link: #f0b27a; --line: rgba(236, 230, 218, .16); --frame: #232d3c; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: var(--font); font-size: 16px; line-height: 1.6;
+  }
+  a { color: inherit; text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
+  a:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 2px; }
+
+  /* the column: same width and side padding as the text on /work */
+  .site, main, .end {
+    width: 100%; max-width: calc(42rem + 40px); margin: 0 auto;
+    padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+  .site { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; padding-top: 32px; margin-top: 1.5rem; }
+  .site .here { color: var(--muted); }
+  main { padding-bottom: 32px; }
+
+  /* title block */
+  .intro { margin-top: 96px; }
+  h1 { margin: 0; font-size: 28px; line-height: 1.25; font-weight: 500; letter-spacing: .04em; }
+  .lede { margin: 12px 0 0; font-size: 16px; }
+  .meta { margin: 8px 0 0; color: var(--muted); }
+
+  /* the three headline numbers: side by side on wide screens, stacked on phones */
+  .stats { list-style: none; margin: 40px 0 0; padding: 20px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .stats li { margin: 0; }
+  .stats .n { display: block; color: var(--fg); font-weight: 500; }
+  .stats .l { display: block; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+  /* sections: a divider above each, like the projects on /work */
+  section { margin-top: 96px; }
+  section::before { content: ""; display: block; height: 1px; background: var(--line); margin-bottom: 40px; }
+  h2 { margin: 0 0 20px; font-size: 16px; font-weight: 500; }
+  h3 { margin: 40px 0 8px; font-size: 16px; font-weight: 500; }
+  p, ul { margin: 0 0 20px; color: var(--muted); text-wrap: pretty; }
+  ul { padding-left: 1.4em; }
+  li { margin-bottom: 10px; }
+  li::marker { color: var(--muted); }
+  .k { color: var(--fg); }           /* the lead-in of a list item, and numbers worth noticing */
+  q { quotes: "“" "”"; font-style: italic; }
+
+  /* slides: full width in the column, in the same rounded frame as /work.
+     Until a slide's PNG is in /work/media/spark/, its frame shows a label saying which file goes there;
+     once the file exists the image covers the label (nothing else to change). */
+  .slide { position: relative; margin: 40px 0; border-radius: 14px; overflow: hidden; background: var(--frame); aspect-ratio: 16 / 9; }
+  .slide img { position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: cover; }
+  .slide .ph { position: absolute; inset: 0; display: grid; place-content: center; gap: 4px; padding: 16px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.5; }
+  .slide .ph b { color: var(--fg); font-weight: 500; }
+  .pair .slide { margin: 0; }
+  .pair { display: grid; gap: 16px; margin: 40px 0; }
+
+  .end { padding-top: 32px; padding-bottom: 160px; color: var(--muted); }
+  .end::before { content: ""; display: block; height: 1px; background: var(--line); margin-bottom: 32px; }
+  .end p { margin: 0 0 8px; }
+
+  @media (max-width: 700px) {
+    .intro { margin-top: 56px; }
+    .stats { grid-template-columns: 1fr; gap: 14px; }
+    section { margin-top: 64px; }
+    section::before { margin-bottom: 32px; }
+    .slide { border-radius: 10px; margin: 28px 0; }
+    .pair { margin: 28px 0; gap: 12px; }
+    .end { padding-bottom: 96px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <a href="/work/">← Back to work</a>
+  <span class="here">Case study</span>
+</header>
+
+<main>
+  <div class="intro">
+    <h1>SimpleReport</h1>
+    <p class="lede">Helping health workers send rapid test results to the CDC</p>
+    <p class="meta">Skylight · Senior Product Designer · Self-serve device management</p>
+
+    <ul class="stats" aria-label="Results">
+      <li><span class="n">2 days → minutes</span><span class="l">to enable a new condition</span></li>
+      <li><span class="n">75%</span><span class="l">fewer support tickets</span></li>
+      <li><span class="n">12% → 52%</span><span class="l">of reporting beyond COVID-19</span></li>
+    </ul>
+
+    <figure class="slide">
+      <img src="/work/media/simplereport/case-study/new-flow.png" width="3840" height="2160" decoding="async" onerror="this.remove()"
+        alt="The new flow: a facility's settings page lists only the testing devices the site actually runs, with an Add devices button that opens the full catalog one step away.">
+      <figcaption class="ph" aria-hidden="true"><b>new-flow.png</b>Figma slide 1:1474 (New flow)</figcaption>
+    </figure>
+  </div>
+
+  <section>
+    <h2>The problem</h2>
+    <p>SimpleReport started as a COVID-19 reporting tool. When testing sites wanted to report on other conditions, like flu or RSV, they couldn’t turn them on themselves. They had to contact support and wait, often for about two days, before they could start testing.</p>
+    <p>I mapped the experience across the three user roles (org admins, standard users and entry-only users) to find what was blocking them, from setup through registering patients, running tests and managing patient info:</p>
+    <ul>
+      <li><span class="k">Setup.</span> Enabling a new condition took about two days and depended on support. <q>I don’t like that I need to wait on customer support.</q></li>
+      <li><span class="k">Registering patients.</span> Entering patient data was slow and redundant. <q>It takes a while to get started testing.</q></li>
+      <li><span class="k">Conducting tests.</span> Staff weren’t confident explaining data privacy. <q>How do I explain to patients that the data is safe?</q></li>
+      <li><span class="k">Managing patients.</span> Dense forms slowed down editing. <q>The number of fields is overwhelming.</q></li>
+    </ul>
+    <p>This case study focuses on the biggest blocker: <span class="k">setup</span>.</p>
+
+    <figure class="slide">
+      <img src="/work/media/simplereport/case-study/experience-map.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Experience map across SimpleReport's three user roles, org admins, standard users and entry-only users, from setup through registering patients, conducting tests and managing patients, with each stage's pain point and a quote from users.">
+      <figcaption class="ph" aria-hidden="true"><b>experience-map.png</b>Figma slide 1:1612 (Experience map)</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Goals</h2>
+    <p><span class="k">Business need:</span> $32M was invested to expand SimpleReport beyond COVID-19.</p>
+    <p><span class="k">Hypothesis:</span> if health admins can quickly enable additional diseases, the CDC will receive a higher volume and range of test results.</p>
+    <p><span class="k">Success criteria:</span></p>
+    <ul>
+      <li>Reduce the time to enable a new condition</li>
+      <li>Reduce support tickets</li>
+      <li>Increase adoption beyond COVID-19</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>The users</h2>
+    <p><span class="k">Nurses</span> use SimpleReport repeatedly over a full shift. Turnover is high, so there’s no time for training. Speed and clarity matter above everything.</p>
+    <p><span class="k">Health administrators</span> manage settings for the entire site. They’re time-poor and juggle multiple responsibilities. They use the tool only occasionally, but they’re the decision-makers.</p>
+
+    <figure class="slide">
+      <img src="/work/media/simplereport/case-study/users.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="SimpleReport's two users: nurses, who use it repeatedly over a full shift with high turnover and no time for training, and health administrators, who manage the whole site's settings, use it occasionally and make the decisions.">
+      <figcaption class="ph" aria-hidden="true"><b>users.png</b>Figma slide 1:1893 (Users)</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Constraints</h2>
+    <ul>
+      <li><span class="k">A growing device list.</span> Every new test device added to the catalog made the list longer, so the design had to scale.</li>
+      <li><span class="k">User permissions.</span> Three roles (org admin, standard and entry-only) meant controlling who could change site settings.</li>
+      <li><span class="k">Self-serve.</span> Admins needed to make changes on their own, without contacting support.</li>
+    </ul>
+
+    <figure class="slide">
+      <img src="/work/media/simplereport/case-study/user-permissions.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="User permissions across SimpleReport's three roles, org admin, standard and entry-only, showing which of them can change site settings.">
+      <figcaption class="ph" aria-hidden="true"><b>user-permissions.png</b>Figma slide 1:1811 (User permissions)</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Explorations</h2>
+
+    <h3>Exploration one: a toggle list</h3>
+    <p>Familiar, but every new device makes the list longer.</p>
+    <figure class="slide">
+      <img src="/work/media/simplereport/case-study/exploration-one.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Exploration one: every testing device in the catalog listed with an on/off toggle, a list that grows with each new device.">
+      <figcaption class="ph" aria-hidden="true"><b>exploration-one.png</b>Figma slide 9:2492 (Exploration one)</figcaption>
+    </figure>
+
+    <h3>Exploration two: search and filters</h3>
+    <p>Faster filtering, but the full catalog still lives on the page.</p>
+    <figure class="slide">
+      <img src="/work/media/simplereport/case-study/exploration-two.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Exploration two: the device catalog with search and condition filters, still showing the full catalog on the page.">
+      <figcaption class="ph" aria-hidden="true"><b>exploration-two.png</b>Figma slide 9:2506 (Exploration two)</figcaption>
+    </figure>
+
+    <h3>Exploration three (selected): show what the site runs</h3>
+    <p>The page shows only the devices the site actually uses, and the full catalog stays one step away. Validated with <span class="k">5 admins</span>.</p>
+    <figure class="slide">
+      <img src="/work/media/simplereport/case-study/exploration-three.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Exploration three, the selected design: the page lists only the devices the site uses, with the full catalog one step away behind Add devices.">
+      <figcaption class="ph" aria-hidden="true"><b>exploration-three.png</b>Figma slide 9:2513 (Exploration three)</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Results</h2>
+    <ul>
+      <li><span class="k">2 days → minutes</span> to enable a condition</li>
+      <li><span class="k">75%</span> fewer support tickets</li>
+      <li><span class="k">12% → 52%</span> of reporting beyond COVID-19</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Reflection</h2>
+    <p><span class="k">The best proof a design works is the workaround disappearing.</span></p>
+  </section>
+</main>
+
+<footer class="end">
+  <p><a href="/work/">← Back to work</a></p>
+  <p><a href="mailto:blakingbread@gmail.com">blakingbread(at)gmail.com</a></p>
+</footer>
+
+</body>
+</html>
