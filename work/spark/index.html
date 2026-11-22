@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SPARK — Nick Blake</title>
+<meta name="description" content="SPARK: helping Shake Shack General Managers turn data into next steps. A case study by Nick Blake.">
+<meta name="robots" content="noindex, nofollow"><!-- unlisted, like /work: only people with the link should find this page -->
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap">
+<!-- Vercel Web Analytics (only runs on the live site) -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  /* Case study: the same type, colors and column as /work (Geist Mono, 16px, the 42rem text column).
+     One column top to bottom; slides sit full width in it, in the same rounded frames as /work. */
+  :root {
+    --bg: #f5f5f1; --fg: #2b2620; --muted: #6d6a5e; --link: #8a4b2a; --line: rgba(43, 38, 32, .14);
+    --frame: #e9e8e1;
+    --font: "Geist Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1b2330; --fg: #ece6da; --muted: #a59f92; --link: #f0b27a; --line: rgba(236, 230, 218, .16); --frame: #232d3c; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: var(--font); font-size: 16px; line-height: 1.6;
+  }
+  a { color: inherit; text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
+  a:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 2px; }
+
+  /* the column: same width and side padding as the text on /work */
+  .site, main, .end {
+    width: 100%; max-width: calc(42rem + 40px); margin: 0 auto;
+    padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+  .site { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; padding-top: 32px; margin-top: 1.5rem; }
+  .site .here { color: var(--muted); }
+  main { padding-bottom: 32px; }
+
+  /* title block */
+  .intro { margin-top: 96px; }
+  h1 { margin: 0; font-size: 28px; line-height: 1.25; font-weight: 500; letter-spacing: .04em; }
+  .lede { margin: 12px 0 0; font-size: 16px; }
+  .meta { margin: 8px 0 0; color: var(--muted); }
+
+  /* the three headline numbers: side by side on wide screens, stacked on phones */
+  .stats { list-style: none; margin: 40px 0 0; padding: 20px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .stats li { margin: 0; }
+  .stats .n { display: block; color: var(--fg); font-weight: 500; }
+  .stats .l { display: block; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+  /* sections: a divider above each, like the projects on /work */
+  section { margin-top: 96px; }
+  section::before { content: ""; display: block; height: 1px; background: var(--line); margin-bottom: 40px; }
+  h2 { margin: 0 0 20px; font-size: 16px; font-weight: 500; }
+  h3 { margin: 40px 0 8px; font-size: 16px; font-weight: 500; }
+  p, ul { margin: 0 0 20px; color: var(--muted); text-wrap: pretty; }
+  ul { padding-left: 1.4em; }
+  li { margin-bottom: 10px; }
+  li::marker { color: var(--muted); }
+  .k { color: var(--fg); }           /* the lead-in of a list item, and numbers worth noticing */
+  q { quotes: "“" "”"; font-style: italic; }
+
+  /* slides: full width in the column, in the same rounded frame as /work.
+     Until a slide's PNG is in /work/media/spark/, its frame shows a label saying which file goes there;
+     once the file exists the image covers the label (nothing else to change). */
+  .slide { position: relative; margin: 40px 0; border-radius: 14px; overflow: hidden; background: var(--frame); aspect-ratio: 16 / 9; }
+  .slide img { position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: cover; }
+  .slide .ph { position: absolute; inset: 0; display: grid; place-content: center; gap: 4px; padding: 16px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.5; }
+  .slide .ph b { color: var(--fg); font-weight: 500; }
+  .pair .slide { margin: 0; }
+  .pair { display: grid; gap: 16px; margin: 40px 0; }
+
+  .end { padding-top: 32px; padding-bottom: 160px; color: var(--muted); }
+  .end::before { content: ""; display: block; height: 1px; background: var(--line); margin-bottom: 32px; }
+  .end p { margin: 0 0 8px; }
+
+  @media (max-width: 700px) {
+    .intro { margin-top: 56px; }
+    .stats { grid-template-columns: 1fr; gap: 14px; }
+    section { margin-top: 64px; }
+    section::before { margin-bottom: 32px; }
+    .slide { border-radius: 10px; margin: 28px 0; }
+    .pair { margin: 28px 0; gap: 12px; }
+    .end { padding-bottom: 96px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <a href="/work/">← Back to work</a>
+  <span class="here">Case study</span>
+</header>
+
+<main>
+  <div class="intro">
+    <h1>SPARK</h1>
+    <p class="lede">Helping Shake Shack General Managers turn data into next steps</p>
+    <p class="meta">Shake Shack · Senior UX Designer · AI-powered restaurant tool (MVP)</p>
+
+    <ul class="stats" aria-label="Results">
+      <li><span class="n">20 min → seconds</span><span class="l">from insight to action</span></li>
+      <li><span class="n">65%</span><span class="l">of suggested actions accepted</span></li>
+      <li><span class="n">10 of 10</span><span class="l">GMs wanted to keep using it</span></li>
+    </ul>
+
+    <figure class="slide">
+      <img src="/work/media/spark/iteration-three.png" width="3840" height="2160" decoding="async" onerror="this.remove()"
+        alt="SPARK's final design: the Hospitality dashboard with recommended actions at the top, each naming its data source such as Snowflake or Harri, beside metric cards comparing today with goal.">
+      <figcaption class="ph" aria-hidden="true"><b>iteration-three.png</b>Figma slide 1:1713 (Iteration three)</figcaption>
+    </figure>
+  </div>
+
+  <section>
+    <h2>The problem</h2>
+    <p>General Managers are accountable for hospitality scores on every shift, but the data they need is spread across several tools. Before a GM could act on anything, they had to check them all.</p>
+    <p>We interviewed GMs, then recorded and transcribed the sessions with Otter AI. I mapped their journey to find where the time went:</p>
+    <ul>
+      <li><span class="k">Noticing a problem.</span> They usually found issues by walking the floor. <q>I find out when the line’s out the door.</q></li>
+      <li><span class="k">Snowflake.</span> Reports were slow and there was no live view. <q>I have to dig to find the right report.</q></li>
+      <li><span class="k">Tableau.</span> Survey scores lagged behind the shift. <q>By the time I see it, lunch is over.</q></li>
+      <li><span class="k">Harri.</span> The schedule didn’t connect to wait times. <q>I’m flipping between screens.</q></li>
+      <li><span class="k">Deciding.</span> Even after all that, they still weren’t sure what to fix first. <q>Just tell me what to fix first.</q></li>
+    </ul>
+    <p>By GMs’ own estimates, it took about <span class="k">20 minutes</span> to get from noticing a problem to acting on it. During a lunch rush, that’s too slow.</p>
+
+    <figure class="slide">
+      <img src="/work/media/spark/journey-map.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Journey map of a General Manager going from noticing a problem to acting on it: walking the floor, checking Snowflake, Tableau and Harri, then deciding what to fix first, with a quote from GMs at each step.">
+      <figcaption class="ph" aria-hidden="true"><b>journey-map.png</b>Figma slide 1:1396 (Journey map)</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Goals</h2>
+    <p><span class="k">Business need:</span> improve hospitality scores across restaurants.</p>
+    <p><span class="k">Hypothesis:</span> if insights and next steps live in one place, GMs will act faster and more often.</p>
+    <p><span class="k">Success criteria:</span></p>
+    <ul>
+      <li>Reduce the time from insight to action</li>
+      <li>Drive the acceptance rate of suggested actions</li>
+      <li>Achieve high GM satisfaction</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>The user</h2>
+    <p>GMs are on the floor during shifts, not at a desk. They piece together data from Snowflake, Tableau and Harri, and they’re accountable for hospitality scores on every shift. Anything I designed had to be readable at a glance and usable mid-shift.</p>
+
+    <figure class="slide">
+      <img src="/work/media/spark/user.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Profile of the user, a Shake Shack General Manager: on the floor during shifts rather than at a desk, piecing together data from Snowflake, Tableau and Harri, and accountable for hospitality scores every shift.">
+      <figcaption class="ph" aria-hidden="true"><b>user.png</b>Figma slide 1:2191 (User)</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Constraints</h2>
+    <ul>
+      <li><span class="k">MVP scope.</span> The full vision covered hospitality, labor, inventory and team. We cut the MVP to hospitality only so we could prove the core idea first.</li>
+      <li><span class="k">Offshore dev team.</span> I had to make handoff clear enough to work across time zones without constant back-and-forth.</li>
+      <li><span class="k">A design system built alongside the product.</span> I created the SPARK design system as we went. It included status colors for on, near and off goal, a simple Inter type scale, and core components like metric cards and action cards. This kept the team consistent and made the product easy to extend later.</li>
+    </ul>
+
+    <div class="pair">
+      <figure class="slide">
+        <img src="/work/media/spark/design-system.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+          alt="The SPARK design system: status colors for on, near and off goal, an Inter type scale, and core components including metric cards and action cards.">
+        <figcaption class="ph" aria-hidden="true"><b>design-system.png</b>Figma slide 1:1501 (Design system)</figcaption>
+      </figure>
+      <figure class="slide">
+        <img src="/work/media/spark/mvp-scope.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+          alt="MVP scope: the full SPARK vision across hospitality, labor, inventory and team, with the MVP cut down to hospitality only.">
+        <figcaption class="ph" aria-hidden="true"><b>mvp-scope.png</b>Figma slide 1:1599 (MVP scope)</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Iterations</h2>
+
+    <h3>Iteration one: metrics first</h3>
+    <p>The dashboard led with metric cards showing how today compared with goal, and suggested actions sat below. GMs could see what was off, but they still asked, <q>So what do I do?</q></p>
+    <figure class="slide">
+      <img src="/work/media/spark/iteration-one.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Iteration one: a dashboard led by metric cards comparing today's hospitality numbers with goal, with suggested actions below them.">
+      <figcaption class="ph" aria-hidden="true"><b>iteration-one.png</b>Figma slide 1:1670 (Iteration one)</figcaption>
+    </figure>
+
+    <h3>Iteration two: actions first</h3>
+    <p>I flipped the hierarchy. Recommended actions moved to the top, ranked by impact on guests, and each one came with its reason. For example: <q>Open a second register until 1:30 PM. Wait time is 6:40, 33% over goal, and the line is still growing.</q> GMs no longer had to cross-reference metrics to understand why.</p>
+    <figure class="slide">
+      <img src="/work/media/spark/iteration-two.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Iteration two: recommended actions moved to the top, ranked by impact on guests, each with its reason, such as opening a second register until 1:30 PM because wait time is 33% over goal.">
+      <figcaption class="ph" aria-hidden="true"><b>iteration-two.png</b>Figma slide 1:1706 (Iteration two)</figcaption>
+    </figure>
+
+    <h3>Iteration three: show the source (selected)</h3>
+    <p>Each action now names where its data comes from, such as Snowflake or Harri. Seeing the source gave GMs enough trust in a recommendation to act on it.</p>
+    <figure class="slide">
+      <img src="/work/media/spark/iteration-three.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Iteration three, the selected design: each recommended action names the source of its data, such as Snowflake or Harri.">
+      <figcaption class="ph" aria-hidden="true"><b>iteration-three.png</b>Figma slide 1:1713 (Iteration three)</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Results</h2>
+    <ul>
+      <li><span class="k">20 minutes → seconds</span> from insight to action</li>
+      <li><span class="k">65%</span> of suggested actions accepted</li>
+      <li><span class="k">10 of 10</span> GMs wanted to keep using SPARK</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Reflection</h2>
+    <p><span class="k">People act on AI they can verify.</span> The biggest jump didn’t come from smarter recommendations. It came from showing GMs where each recommendation came from.</p>
+  </section>
+</main>
+
+<footer class="end">
+  <p><a href="/work/">← Back to work</a></p>
+  <p><a href="mailto:blakingbread@gmail.com">blakingbread(at)gmail.com</a></p>
+</footer>
+
+</body>
+</html>
