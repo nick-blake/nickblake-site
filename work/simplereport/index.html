@@ -172,6 +172,7 @@
     <p class="takeaway">Designed for two very different users: nurses who use it all shift, and admins who use it now and then.</p>
     <p><span class="k">Nurses</span> use SimpleReport repeatedly over a full shift. Turnover is high, so there’s no time for training. Speed and clarity matter above everything.</p>
     <p><span class="k">Health administrators</span> manage settings for the entire site. They’re time-poor and juggle multiple responsibilities. They use the tool only occasionally, but they’re the decision-makers.</p>
+    <p>In SimpleReport, administrators are org admins: the only role that can change what a site tests for. Nurses work as standard or entry-only users.</p>
   </section>
 
   <section>
@@ -179,7 +180,7 @@
     <p class="takeaway">Each constraint shaped the design.</p>
     <ul>
       <li><span class="k">A growing device list → a design that scales.</span> Every new test device added to the catalog made the list longer, so the design couldn’t depend on its length.</li>
-      <li><span class="k">User permissions → control over who changes settings.</span> Three roles (org admin, standard and entry-only) meant controlling who could change site settings.</li>
+      <li><span class="k">User permissions → control over who changes settings.</span> Three roles (org admin, standard and entry-only) meant controlling who could change site settings. Only org admins can change what a site tests for. Standard and entry-only users can’t.</li>
       <li><span class="k">Self-serve → no waiting on support.</span> Admins needed to make changes on their own, without contacting support.</li>
     </ul>
   </section>
