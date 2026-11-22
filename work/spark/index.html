@@ -70,11 +70,11 @@
   .k { color: var(--fg); }           /* the lead-in of a list item, and numbers worth noticing */
   q { quotes: "“" "”"; font-style: italic; }
 
-  /* slides: full width in the column, in the same rounded frame as /work.
-     Until a slide's PNG is in /work/media/spark/, its frame shows a label saying which file goes there;
-     once the file exists the image covers the label (nothing else to change). */
+  /* graphics from the slides (cropped, without the slide around them) and videos: full width in the column,
+     in a rounded frame like /work. If an image file is missing, its frame shows a label naming the file instead. */
   .slide { position: relative; margin: 40px 0; border-radius: 14px; overflow: hidden; background: var(--frame); aspect-ratio: 16 / 9; }
-  .slide img { position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: cover; }
+  .slide:has(img, video) { aspect-ratio: auto; }   /* filled: the frame takes the graphic's own shape */
+  .slide img, .slide video { position: relative; z-index: 1; display: block; width: 100%; height: auto; }
   .slide .ph { position: absolute; inset: 0; display: grid; place-content: center; gap: 4px; padding: 16px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.5; }
   .slide .ph b { color: var(--fg); font-weight: 500; }
   .pair .slide { margin: 0; }
@@ -115,9 +115,8 @@
     </ul>
 
     <figure class="slide">
-      <img src="/work/media/spark/iteration-three.png" width="3840" height="2160" decoding="async" onerror="this.remove()"
-        alt="SPARK's final design: the Hospitality dashboard with recommended actions at the top, each naming its data source such as Snowflake or Harri, beside metric cards comparing today with goal.">
-      <figcaption class="ph" aria-hidden="true"><b>iteration-three.png</b>Figma slide 1:1713 (Iteration three)</figcaption>
+      <video src="/work/media/shake-shack/spark.mp4" poster="/work/media/shake-shack/spark-poster.jpg" width="1920" height="1200"
+        autoplay preload="auto" muted loop playsinline aria-label="SPARK, the selected design: switching from today's hospitality metrics to this week's, then marking a recommended action done; each action names its data source, such as Snowflake or Harri"></video>
     </figure>
   </div>
 
@@ -135,8 +134,8 @@
     <p>By GMs’ own estimates, it took about <span class="k">20 minutes</span> to get from noticing a problem to acting on it. During a lunch rush, that’s too slow.</p>
 
     <figure class="slide">
-      <img src="/work/media/spark/journey-map.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-        alt="Journey map of a General Manager going from noticing a problem to acting on it: walking the floor, checking Snowflake, Tableau and Harri, then deciding what to fix first, with a quote from GMs at each step.">
+      <img src="/work/media/spark/journey-map.png" width="1600" height="564" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Journey map: notice a problem, check Snowflake, check Tableau, check Harri, decide and act, with a pain point and a GM quote under each step, and a total of about 20 minutes from noticing a problem to acting on it.">
       <figcaption class="ph" aria-hidden="true"><b>journey-map.png</b>Figma slide 1:1396 (Journey map)</figcaption>
     </figure>
   </section>
@@ -156,12 +155,6 @@
   <section>
     <h2>The user</h2>
     <p>GMs are on the floor during shifts, not at a desk. They piece together data from Snowflake, Tableau and Harri, and they’re accountable for hospitality scores on every shift. Anything I designed had to be readable at a glance and usable mid-shift.</p>
-
-    <figure class="slide">
-      <img src="/work/media/spark/user.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-        alt="Profile of the user, a Shake Shack General Manager: on the floor during shifts rather than at a desk, piecing together data from Snowflake, Tableau and Harri, and accountable for hospitality scores every shift.">
-      <figcaption class="ph" aria-hidden="true"><b>user.png</b>Figma slide 1:2191 (User)</figcaption>
-    </figure>
   </section>
 
   <section>
@@ -172,18 +165,11 @@
       <li><span class="k">A design system built alongside the product.</span> I created the SPARK design system as we went. It included status colors for on, near and off goal, a simple Inter type scale, and core components like metric cards and action cards. This kept the team consistent and made the product easy to extend later.</li>
     </ul>
 
-    <div class="pair">
-      <figure class="slide">
-        <img src="/work/media/spark/design-system.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-          alt="The SPARK design system: status colors for on, near and off goal, an Inter type scale, and core components including metric cards and action cards.">
-        <figcaption class="ph" aria-hidden="true"><b>design-system.png</b>Figma slide 1:1501 (Design system)</figcaption>
-      </figure>
-      <figure class="slide">
-        <img src="/work/media/spark/mvp-scope.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-          alt="MVP scope: the full SPARK vision across hospitality, labor, inventory and team, with the MVP cut down to hospitality only.">
-        <figcaption class="ph" aria-hidden="true"><b>mvp-scope.png</b>Figma slide 1:1599 (MVP scope)</figcaption>
-      </figure>
-    </div>
+    <figure class="slide">
+      <img src="/work/media/spark/design-system.png" width="1600" height="1423" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="The SPARK design system: colors (ink, surface, neutral, and on, near and off goal), the Inter type scale, and components including status badges, a Mark done button, a metric card and an action card.">
+      <figcaption class="ph" aria-hidden="true"><b>design-system.png</b>Figma slide 1:1501 (Design system)</figcaption>
+    </figure>
   </section>
 
   <section>
@@ -192,7 +178,7 @@
     <h3>Iteration one: metrics first</h3>
     <p>The dashboard led with metric cards showing how today compared with goal, and suggested actions sat below. GMs could see what was off, but they still asked, <q>So what do I do?</q></p>
     <figure class="slide">
-      <img src="/work/media/spark/iteration-one.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+      <img src="/work/media/spark/iteration-one.png" width="1600" height="1164" loading="lazy" decoding="async" onerror="this.remove()"
         alt="Iteration one: a dashboard led by metric cards comparing today's hospitality numbers with goal, with suggested actions below them.">
       <figcaption class="ph" aria-hidden="true"><b>iteration-one.png</b>Figma slide 1:1670 (Iteration one)</figcaption>
     </figure>
@@ -200,7 +186,7 @@
     <h3>Iteration two: actions first</h3>
     <p>I flipped the hierarchy. Recommended actions moved to the top, ranked by impact on guests, and each one came with its reason. For example: <q>Open a second register until 1:30 PM. Wait time is 6:40, 33% over goal, and the line is still growing.</q> GMs no longer had to cross-reference metrics to understand why.</p>
     <figure class="slide">
-      <img src="/work/media/spark/iteration-two.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
+      <img src="/work/media/spark/iteration-two.png" width="1600" height="1164" loading="lazy" decoding="async" onerror="this.remove()"
         alt="Iteration two: recommended actions moved to the top, ranked by impact on guests, each with its reason, such as opening a second register until 1:30 PM because wait time is 33% over goal.">
       <figcaption class="ph" aria-hidden="true"><b>iteration-two.png</b>Figma slide 1:1706 (Iteration two)</figcaption>
     </figure>
@@ -208,9 +194,8 @@
     <h3>Iteration three: show the source (selected)</h3>
     <p>Each action now names where its data comes from, such as Snowflake or Harri. Seeing the source gave GMs enough trust in a recommendation to act on it.</p>
     <figure class="slide">
-      <img src="/work/media/spark/iteration-three.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-        alt="Iteration three, the selected design: each recommended action names the source of its data, such as Snowflake or Harri.">
-      <figcaption class="ph" aria-hidden="true"><b>iteration-three.png</b>Figma slide 1:1713 (Iteration three)</figcaption>
+      <video data-src="/work/media/shake-shack/spark.mp4" poster="/work/media/shake-shack/spark-poster.jpg" width="1920" height="1200"
+        data-lazy preload="none" muted loop playsinline aria-label="Iteration three, the selected design: each recommended action names the source of its data, such as Snowflake or Harri"></video>
     </figure>
   </section>
 
@@ -233,6 +218,21 @@
   <p><a href="/work/">← Back to work</a></p>
   <p><a href="mailto:blakingbread@gmail.com">blakingbread(at)gmail.com</a></p>
 </footer>
+
+<script>
+  // Videos: the lower one starts loading when it gets near the screen. People who've asked their device to
+  // reduce motion see each video's still frame instead of it playing.
+  (() => {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const vids = [...document.querySelectorAll('.slide video')];
+    if (reduce) { vids.forEach(v => { v.removeAttribute('autoplay'); v.pause(); }); return; }
+    const start = v => { if (v.dataset.src) { v.src = v.dataset.src; delete v.dataset.src; } const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+    const lazy = vids.filter(v => v.hasAttribute('data-lazy'));
+    if (!('IntersectionObserver' in window)) return lazy.forEach(start);
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { start(e.target); io.unobserve(e.target); } }), { rootMargin: '400px 0px' });
+    lazy.forEach(v => io.observe(v));
+  })();
+</script>
 
 </body>
 </html>
