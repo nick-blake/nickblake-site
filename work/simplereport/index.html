@@ -69,12 +69,27 @@
   li::marker { color: var(--muted); }
   .k { color: var(--fg); }           /* the lead-in of a list item, and numbers worth noticing */
   q { quotes: "“" "”"; font-style: italic; }
+  /* each section's takeaway: a larger lead line right under the heading, in the darker text color, so skimming
+     the headings and takeaways alone tells the whole story; iteration takeaways are a step smaller */
+  .takeaway { margin: -8px 0 24px; color: var(--fg); font-size: 20px; line-height: 1.45; text-wrap: balance; }
+  .takeaway.sub { margin: -4px 0 16px; font-size: 18px; }
 
-  /* slides: full width in the column, in the same rounded frame as /work.
-     Until a slide's PNG is in /work/media/spark/, its frame shows a label saying which file goes there;
-     once the file exists the image covers the label (nothing else to change). */
+  /* graphics from the slides (cropped, without the slide around them) and videos: full width in the column,
+     in a rounded frame like /work. If an image file is missing, its frame shows a label naming the file instead. */
   .slide { position: relative; margin: 40px 0; border-radius: 14px; overflow: hidden; background: var(--frame); aspect-ratio: 16 / 9; }
-  .slide img { position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: cover; }
+  .slide:has(img, video) { aspect-ratio: auto; }   /* filled: the frame takes the graphic's own shape */
+  .slide img, .slide video { position: relative; z-index: 1; display: block; width: 100%; height: auto; }
+  /* the videos show the app at exactly the size of the iteration screens: the same frame shape (1600 x 1164),
+     with the video's window (1433 of its 1920 px) scaled to the screens' window (1036 of 1148 px), centered;
+     only plain background around the window is trimmed */
+  .slide.iter:has(video) { aspect-ratio: 1600 / 1164; }
+  .slide.iter video { position: absolute; left: 50%; top: 50%; width: 120.94%; height: auto; max-width: none; transform: translate(-50%, -50%); }
+  /* SimpleReport's recordings: their window (1210 x 1080 of 1920 x 1200, centered) is shown at the same width as the
+     SPARK window (1036 of 1148 px = 90.24% of the frame), so the video is 143.2% of the frame's width. That window is
+     squarer, so the frame is taller (keeping the same margin around it); the frame takes the recording's background */
+  .slide.iter.sr { background: #edf1f7; }
+  .slide.iter.sr:has(video) { aspect-ratio: 1 / 0.9031; }
+  .slide.iter.sr video { width: 143.2%; }
   .slide .ph { position: absolute; inset: 0; display: grid; place-content: center; gap: 4px; padding: 16px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.5; }
   .slide .ph b { color: var(--fg); font-weight: 500; }
   .pair .slide { margin: 0; }
@@ -86,6 +101,8 @@
 
   @media (max-width: 700px) {
     .intro { margin-top: 56px; }
+    .takeaway { font-size: 18px; }
+    .takeaway.sub { font-size: 17px; }
     .stats { grid-template-columns: 1fr; gap: 14px; }
     section { margin-top: 64px; }
     section::before { margin-bottom: 32px; }
@@ -114,101 +131,97 @@
       <li><span class="n">12% → 52%</span><span class="l">of reporting beyond COVID-19</span></li>
     </ul>
 
-    <figure class="slide">
-      <img src="/work/media/simplereport/case-study/new-flow.png" width="3840" height="2160" decoding="async" onerror="this.remove()"
-        alt="The new flow: a facility's settings page lists only the testing devices the site actually runs, with an Add devices button that opens the full catalog one step away.">
-      <figcaption class="ph" aria-hidden="true"><b>new-flow.png</b>Figma slide 1:1474 (New flow)</figcaption>
+    <figure class="slide iter sr"><!-- New flow: Figma slide 1:1474, shown as the Add devices walkthrough -->
+      <video src="/work/media/simplereport/add-devices.mp4" poster="/work/media/simplereport/add-devices-poster.jpg" width="1920" height="1200"
+        autoplay preload="auto" muted loop playsinline aria-label="The new flow: a facility's Testing devices list shows only the devices the site runs, and Add devices opens the full catalog to turn more on"></video>
     </figure>
   </div>
 
   <section>
+    <h2>My role</h2>
+    <p>I was the senior product designer on SimpleReport at Skylight. I led design for the workflows clinic staff use to report results and manage their testing sites, and I scaled our design system, built on USWDS (the U.S. Web Design System), working closely with engineering.</p>
+  </section>
+
+  <section>
     <h2>The problem</h2>
-    <p>SimpleReport started as a COVID-19 reporting tool. When testing sites wanted to report on other conditions, like flu or RSV, they couldn’t turn them on themselves. They had to contact support and wait, often for about two days, before they could start testing.</p>
-    <p>I mapped the experience across the three user roles (org admins, standard users and entry-only users) to find what was blocking them, from setup through registering patients, running tests and managing patient info:</p>
-    <ul>
-      <li><span class="k">Setup.</span> Enabling a new condition took about two days and depended on support. <q>I don’t like that I need to wait on customer support.</q></li>
-      <li><span class="k">Registering patients.</span> Entering patient data was slow and redundant. <q>It takes a while to get started testing.</q></li>
-      <li><span class="k">Conducting tests.</span> Staff weren’t confident explaining data privacy. <q>How do I explain to patients that the data is safe?</q></li>
-      <li><span class="k">Managing patients.</span> Dense forms slowed down editing. <q>The number of fields is overwhelming.</q></li>
-    </ul>
-    <p>This case study focuses on the biggest blocker: <span class="k">setup</span>.</p>
+    <p class="takeaway">Testing sites waited about two days on support before they could test for a new condition.</p>
+    <p>SimpleReport started as a COVID-19 reporting tool. When testing sites wanted to report on other conditions, like flu or RSV, they couldn’t turn them on themselves. They had to contact support and wait, often about two days, before they could start testing.</p>
+    <p>I mapped the experience across the three user roles, from setup through registering patients, running tests and managing patient info. Setup was the biggest blocker: <q>I don’t like that I need to wait on customer support.</q></p>
 
     <figure class="slide">
-      <img src="/work/media/simplereport/case-study/experience-map.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-        alt="Experience map across SimpleReport's three user roles, org admins, standard users and entry-only users, from setup through registering patients, conducting tests and managing patients, with each stage's pain point and a quote from users.">
+      <img src="/work/media/simplereport/case-study/experience-map.png" width="1600" height="890" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="Experience map across set up, register patients, conduct tests and patient management, with objectives, pain points, opportunities and a user quote for each, color-coded by role: org admin, standard and entry-only users. Set up is highlighted: about 2 days to enable additional conditions, and the quote “I don’t like that I need to wait on customer support.”">
       <figcaption class="ph" aria-hidden="true"><b>experience-map.png</b>Figma slide 1:1612 (Experience map)</figcaption>
     </figure>
   </section>
 
   <section>
-    <h2>Goals</h2>
-    <p><span class="k">Business need:</span> $32M was invested to expand SimpleReport beyond COVID-19.</p>
-    <p><span class="k">Hypothesis:</span> if health admins can quickly enable additional diseases, the CDC will receive a higher volume and range of test results.</p>
-    <p><span class="k">Success criteria:</span></p>
+    <h2>The hypothesis</h2>
+    <p class="takeaway">If admins could turn on new conditions themselves, the CDC would get more results, for more diseases.</p>
+    <p>$32M was invested to expand SimpleReport beyond COVID-19. The hypothesis was that if health admins could quickly enable additional diseases, the CDC would receive a higher volume and range of test results.</p>
+    <p>I defined success as:</p>
     <ul>
-      <li>Reduce the time to enable a new condition</li>
-      <li>Reduce support tickets</li>
-      <li>Increase adoption beyond COVID-19</li>
+      <li>Less time to enable a new condition</li>
+      <li>Fewer support tickets</li>
+      <li>More adoption beyond COVID-19</li>
     </ul>
   </section>
 
   <section>
     <h2>The users</h2>
+    <p class="takeaway">Designed for two very different users: nurses who use it all shift, and admins who use it now and then.</p>
     <p><span class="k">Nurses</span> use SimpleReport repeatedly over a full shift. Turnover is high, so there’s no time for training. Speed and clarity matter above everything.</p>
     <p><span class="k">Health administrators</span> manage settings for the entire site. They’re time-poor and juggle multiple responsibilities. They use the tool only occasionally, but they’re the decision-makers.</p>
-
-    <figure class="slide">
-      <img src="/work/media/simplereport/case-study/users.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-        alt="SimpleReport's two users: nurses, who use it repeatedly over a full shift with high turnover and no time for training, and health administrators, who manage the whole site's settings, use it occasionally and make the decisions.">
-      <figcaption class="ph" aria-hidden="true"><b>users.png</b>Figma slide 1:1893 (Users)</figcaption>
-    </figure>
   </section>
 
   <section>
     <h2>Constraints</h2>
+    <p class="takeaway">Each constraint shaped the design.</p>
     <ul>
-      <li><span class="k">A growing device list.</span> Every new test device added to the catalog made the list longer, so the design had to scale.</li>
-      <li><span class="k">User permissions.</span> Three roles (org admin, standard and entry-only) meant controlling who could change site settings.</li>
-      <li><span class="k">Self-serve.</span> Admins needed to make changes on their own, without contacting support.</li>
+      <li><span class="k">A growing device list → a design that scales.</span> Every new test device added to the catalog made the list longer, so the design couldn’t depend on its length.</li>
+      <li><span class="k">User permissions → control over who changes settings.</span> Three roles (org admin, standard and entry-only) meant controlling who could change site settings.</li>
+      <li><span class="k">Self-serve → no waiting on support.</span> Admins needed to make changes on their own, without contacting support.</li>
     </ul>
 
     <figure class="slide">
-      <img src="/work/media/simplereport/case-study/user-permissions.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-        alt="User permissions across SimpleReport's three roles, org admin, standard and entry-only, showing which of them can change site settings.">
+      <img src="/work/media/simplereport/case-study/user-permissions.png" width="1406" height="1064" loading="lazy" decoding="async" onerror="this.remove()"
+        alt="SimpleReport's three user roles, stacked: org admin users, standard users and entry-only users.">
       <figcaption class="ph" aria-hidden="true"><b>user-permissions.png</b>Figma slide 1:1811 (User permissions)</figcaption>
     </figure>
   </section>
 
   <section>
     <h2>Explorations</h2>
+    <p class="takeaway">Three explorations, each showing less of the catalog: everything → filtered → only what the site runs.</p>
 
     <h3>Exploration one: a toggle list</h3>
-    <p>Familiar, but every new device makes the list longer.</p>
-    <figure class="slide">
-      <img src="/work/media/simplereport/case-study/exploration-one.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-        alt="Exploration one: every testing device in the catalog listed with an on/off toggle, a list that grows with each new device.">
-      <figcaption class="ph" aria-hidden="true"><b>exploration-one.png</b>Figma slide 9:2492 (Exploration one)</figcaption>
+    <p class="takeaway sub">Familiar, but it grew with every device.</p>
+    <p>Every device in the catalog had an on/off toggle. Admins knew how to use it, but every new device made the list longer.</p>
+    <figure class="slide iter sr"><!-- Exploration one: Figma slide 9:2492 -->
+      <video data-src="/work/media/simplereport/case-study/exploration-one.mp4" poster="/work/media/simplereport/case-study/exploration-one-poster.jpg" width="1920" height="1200"
+        data-lazy preload="none" muted loop playsinline aria-label="Exploration one: every testing device in the catalog listed with an on/off toggle, being switched on one by one"></video>
     </figure>
 
     <h3>Exploration two: search and filters</h3>
-    <p>Faster filtering, but the full catalog still lives on the page.</p>
-    <figure class="slide">
-      <img src="/work/media/simplereport/case-study/exploration-two.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-        alt="Exploration two: the device catalog with search and condition filters, still showing the full catalog on the page.">
-      <figcaption class="ph" aria-hidden="true"><b>exploration-two.png</b>Figma slide 9:2506 (Exploration two)</figcaption>
+    <p class="takeaway sub">Faster to find a device, but the whole catalog still lived on the page.</p>
+    <p>Search and condition filters made it faster to find the right device. But the full catalog was still on the page, and the list would keep growing.</p>
+    <figure class="slide iter sr"><!-- Exploration two: Figma slide 9:2506 -->
+      <video data-src="/work/media/simplereport/case-study/exploration-two.mp4" poster="/work/media/simplereport/case-study/exploration-two-poster.jpg" width="1920" height="1200"
+        data-lazy preload="none" muted loop playsinline aria-label="Exploration two: the device catalog with search and condition filters, enabled devices grouped at the top"></video>
     </figure>
 
-    <h3>Exploration three (selected): show what the site runs</h3>
-    <p>The page shows only the devices the site actually uses, and the full catalog stays one step away. Validated with <span class="k">5 admins</span>.</p>
-    <figure class="slide">
-      <img src="/work/media/simplereport/case-study/exploration-three.png" width="3840" height="2160" loading="lazy" decoding="async" onerror="this.remove()"
-        alt="Exploration three, the selected design: the page lists only the devices the site uses, with the full catalog one step away behind Add devices.">
-      <figcaption class="ph" aria-hidden="true"><b>exploration-three.png</b>Figma slide 9:2513 (Exploration three)</figcaption>
+    <h3>Exploration three: show what the site runs (selected)</h3>
+    <p class="takeaway sub">Show only the devices the site uses, and keep the catalog one step away.</p>
+    <p>The page shows only the devices the site actually uses, and the full catalog stays one step away, behind Add devices. Validated with 5 admins.</p>
+    <figure class="slide iter sr"><!-- Exploration three: Figma slide 9:2513, shown as the Add devices walkthrough -->
+      <video data-src="/work/media/simplereport/add-devices.mp4" poster="/work/media/simplereport/add-devices-poster.jpg" width="1920" height="1200"
+        data-lazy preload="none" muted loop playsinline aria-label="Exploration three, the selected design: the page lists only the devices the site runs; Add devices opens the full catalog, filtered by condition, to add more"></video>
     </figure>
   </section>
 
   <section>
     <h2>Results</h2>
+    <p class="takeaway">Sites turned on new conditions in minutes instead of days, and reporting beyond COVID-19 more than quadrupled.</p>
     <ul>
       <li><span class="k">2 days → minutes</span> to enable a condition</li>
       <li><span class="k">75%</span> fewer support tickets</li>
@@ -218,7 +231,8 @@
 
   <section>
     <h2>Reflection</h2>
-    <p><span class="k">The best proof a design works is the workaround disappearing.</span></p>
+    <p class="takeaway">The best proof a design works is the workaround disappearing.</p>
+    <p>Before, turning on a new condition meant a support ticket and a two-day wait. Once admins could do it themselves, support tickets dropped by 75%. The workaround didn’t need to be discouraged; it simply stopped being necessary.</p>
   </section>
 </main>
 
@@ -226,6 +240,21 @@
   <p><a href="/work/">← Back to work</a></p>
   <p><a href="mailto:blakingbread@gmail.com">blakingbread(at)gmail.com</a></p>
 </footer>
+
+<script>
+  // Videos: the lower one starts loading when it gets near the screen. People who've asked their device to
+  // reduce motion see each video's still frame instead of it playing.
+  (() => {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const vids = [...document.querySelectorAll('.slide video')];
+    if (reduce) { vids.forEach(v => { v.removeAttribute('autoplay'); v.pause(); }); return; }
+    const start = v => { if (v.dataset.src) { v.src = v.dataset.src; delete v.dataset.src; } const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+    const lazy = vids.filter(v => v.hasAttribute('data-lazy'));
+    if (!('IntersectionObserver' in window)) return lazy.forEach(start);
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { start(e.target); io.unobserve(e.target); } }), { rootMargin: '400px 0px' });
+    lazy.forEach(v => io.observe(v));
+  })();
+</script>
 
 </body>
 </html>

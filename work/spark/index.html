@@ -84,6 +84,12 @@
      only plain background around the window is trimmed */
   .slide.iter:has(video) { aspect-ratio: 1600 / 1164; }
   .slide.iter video { position: absolute; left: 50%; top: 50%; width: 120.94%; height: auto; max-width: none; transform: translate(-50%, -50%); }
+  /* SimpleReport's recordings: their window (1210 x 1080 of 1920 x 1200, centered) is shown at the same width as the
+     SPARK window (1036 of 1148 px = 90.24% of the frame), so the video is 143.2% of the frame's width. That window is
+     squarer, so the frame is taller (keeping the same margin around it); the frame takes the recording's background */
+  .slide.iter.sr { background: #edf1f7; }
+  .slide.iter.sr:has(video) { aspect-ratio: 1 / 0.9031; }
+  .slide.iter.sr video { width: 143.2%; }
   .slide .ph { position: absolute; inset: 0; display: grid; place-content: center; gap: 4px; padding: 16px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.5; }
   .slide .ph b { color: var(--fg); font-weight: 500; }
   .pair .slide { margin: 0; }
