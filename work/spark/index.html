@@ -69,12 +69,21 @@
   li::marker { color: var(--muted); }
   .k { color: var(--fg); }           /* the lead-in of a list item, and numbers worth noticing */
   q { quotes: "“" "”"; font-style: italic; }
+  /* each section's takeaway: a larger lead line right under the heading, in the darker text color, so skimming
+     the headings and takeaways alone tells the whole story; iteration takeaways are a step smaller */
+  .takeaway { margin: -8px 0 24px; color: var(--fg); font-size: 20px; line-height: 1.45; text-wrap: balance; }
+  .takeaway.sub { margin: -4px 0 16px; font-size: 18px; }
 
   /* graphics from the slides (cropped, without the slide around them) and videos: full width in the column,
      in a rounded frame like /work. If an image file is missing, its frame shows a label naming the file instead. */
   .slide { position: relative; margin: 40px 0; border-radius: 14px; overflow: hidden; background: var(--frame); aspect-ratio: 16 / 9; }
   .slide:has(img, video) { aspect-ratio: auto; }   /* filled: the frame takes the graphic's own shape */
   .slide img, .slide video { position: relative; z-index: 1; display: block; width: 100%; height: auto; }
+  /* the videos show the app at exactly the size of the iteration screens: the same frame shape (1600 x 1164),
+     with the video's window (1433 of its 1920 px) scaled to the screens' window (1036 of 1148 px), centered;
+     only plain background around the window is trimmed */
+  .slide.iter:has(video) { aspect-ratio: 1600 / 1164; }
+  .slide.iter video { position: absolute; left: 50%; top: 50%; width: 120.94%; height: auto; max-width: none; transform: translate(-50%, -50%); }
   .slide .ph { position: absolute; inset: 0; display: grid; place-content: center; gap: 4px; padding: 16px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.5; }
   .slide .ph b { color: var(--fg); font-weight: 500; }
   .pair .slide { margin: 0; }
@@ -86,6 +95,8 @@
 
   @media (max-width: 700px) {
     .intro { margin-top: 56px; }
+    .takeaway { font-size: 18px; }
+    .takeaway.sub { font-size: 17px; }
     .stats { grid-template-columns: 1fr; gap: 14px; }
     section { margin-top: 64px; }
     section::before { margin-bottom: 32px; }
@@ -106,32 +117,38 @@
   <div class="intro">
     <h1>SPARK</h1>
     <p class="lede">Helping Shake Shack General Managers turn data into next steps</p>
-    <p class="meta">Shake Shack · Senior UX Designer · AI-powered restaurant tool (MVP)</p>
+    <p class="meta">Shake Shack · Product Designer · AI-powered restaurant tool (MVP)</p>
 
     <ul class="stats" aria-label="Results">
       <li><span class="n">20 min → seconds</span><span class="l">from insight to action</span></li>
       <li><span class="n">65%</span><span class="l">of suggested actions accepted</span></li>
-      <li><span class="n">10 of 10</span><span class="l">GMs wanted to keep using it</span></li>
+      <li><span class="n">10 of 10</span><span class="l">GMs wanted to keep using the tool</span></li>
     </ul>
 
-    <figure class="slide">
+    <figure class="slide iter">
       <video src="/work/media/shake-shack/spark.mp4" poster="/work/media/shake-shack/spark-poster.jpg" width="1920" height="1200"
         autoplay preload="auto" muted loop playsinline aria-label="SPARK, the selected design: switching from today's hospitality metrics to this week's, then marking a recommended action done; each action names its data source, such as Snowflake or Harri"></video>
     </figure>
   </div>
 
   <section>
+    <h2>My role</h2>
+    <p>I was the sole product designer on SPARK. I owned the design end to end: GM research, journey mapping, the product design, and the SPARK design system. I worked with a product manager and an offshore engineering team.</p>
+  </section>
+
+  <section>
     <h2>The problem</h2>
-    <p>General Managers are accountable for hospitality scores on every shift, but the data they need is spread across several tools. Before a GM could act on anything, they had to check them all.</p>
-    <p>We interviewed GMs, then recorded and transcribed the sessions with Otter AI. I mapped their journey to find where the time went:</p>
+    <p class="takeaway">GMs spent about 20 minutes jumping between tools before they could fix anything.</p>
+    <p>General Managers are accountable for hospitality scores on every shift. But the data they need lives in three different tools, and none of them say what to do next.</p>
+    <p>I interviewed GMs and mapped their journey to find where the time went:</p>
     <ul>
-      <li><span class="k">Noticing a problem.</span> They usually found issues by walking the floor. <q>I find out when the line’s out the door.</q></li>
-      <li><span class="k">Snowflake.</span> Reports were slow and there was no live view. <q>I have to dig to find the right report.</q></li>
-      <li><span class="k">Tableau.</span> Survey scores lagged behind the shift. <q>By the time I see it, lunch is over.</q></li>
-      <li><span class="k">Harri.</span> The schedule didn’t connect to wait times. <q>I’m flipping between screens.</q></li>
-      <li><span class="k">Deciding.</span> Even after all that, they still weren’t sure what to fix first. <q>Just tell me what to fix first.</q></li>
+      <li><span class="k">Noticing a problem:</span> they walked the floor. <q>I find out when the line’s out the door.</q></li>
+      <li><span class="k">Snowflake:</span> slow reports, no live view. <q>I have to dig to find the right report.</q></li>
+      <li><span class="k">Tableau:</span> survey scores lagged behind the shift. <q>By the time I see it, lunch is over.</q></li>
+      <li><span class="k">Harri:</span> the schedule didn’t connect to wait times. <q>I’m flipping between screens.</q></li>
+      <li><span class="k">Deciding:</span> still no clear priority. <q>Just tell me what to fix first.</q></li>
     </ul>
-    <p>By GMs’ own estimates, it took about <span class="k">20 minutes</span> to get from noticing a problem to acting on it. During a lunch rush, that’s too slow.</p>
+    <p>By GMs’ own estimates, it took about 20 minutes to get from noticing a problem to acting on it.</p>
 
     <figure class="slide">
       <img src="/work/media/spark/journey-map.png" width="1600" height="564" loading="lazy" decoding="async" onerror="this.remove()"
@@ -141,28 +158,30 @@
   </section>
 
   <section>
-    <h2>Goals</h2>
-    <p><span class="k">Business need:</span> improve hospitality scores across restaurants.</p>
-    <p><span class="k">Hypothesis:</span> if insights and next steps live in one place, GMs will act faster and more often.</p>
-    <p><span class="k">Success criteria:</span></p>
+    <h2>The hypothesis</h2>
+    <p class="takeaway">GMs didn’t need more data. They needed to know what to do next.</p>
+    <p>Shake Shack wanted better hospitality scores across its restaurants. My hypothesis was that if insights and next steps lived in one place, GMs would act faster and more often.</p>
+    <p>I defined success as:</p>
     <ul>
-      <li>Reduce the time from insight to action</li>
-      <li>Drive the acceptance rate of suggested actions</li>
-      <li>Achieve high GM satisfaction</li>
+      <li>Less time from insight to action</li>
+      <li>Suggested actions accepted</li>
+      <li>High GM satisfaction</li>
     </ul>
   </section>
 
   <section>
     <h2>The user</h2>
-    <p>GMs are on the floor during shifts, not at a desk. They piece together data from Snowflake, Tableau and Harri, and they’re accountable for hospitality scores on every shift. Anything I designed had to be readable at a glance and usable mid-shift.</p>
+    <p class="takeaway">Designed for a GM on the floor, mid-shift, with seconds to spare.</p>
+    <p>GMs aren’t at a desk. They glance at a screen between tasks while running the shift. Every screen had to answer “what’s wrong and what do I do?” in one look.</p>
   </section>
 
   <section>
     <h2>Constraints</h2>
+    <p class="takeaway">Each constraint shaped how I worked.</p>
     <ul>
-      <li><span class="k">MVP scope.</span> The full vision covered hospitality, labor, inventory and team. We cut the MVP to hospitality only so we could prove the core idea first.</li>
-      <li><span class="k">Offshore dev team.</span> I had to make handoff clear enough to work across time zones without constant back-and-forth.</li>
-      <li><span class="k">A design system built alongside the product.</span> I created the SPARK design system as we went. It included status colors for on, near and off goal, a simple Inter type scale, and core components like metric cards and action cards. This kept the team consistent and made the product easy to extend later.</li>
+      <li><span class="k">MVP scope → hospitality only.</span> The full vision covered labor, inventory and team too. I cut the MVP to one area so we could prove the core idea fast and with less risk.</li>
+      <li><span class="k">An offshore dev team → prototype fast.</span> With limited overlap across time zones, I used Figma MCP and AI tools to prototype quickly, so ideas moved from design to working software faster.</li>
+      <li><span class="k">No existing design system → I built one alongside the product.</span> Status colors (on, near and off goal), an Inter type scale, and reusable metric and action cards kept the build consistent and make it easy to add labor or inventory next.</li>
     </ul>
 
     <figure class="slide">
@@ -174,26 +193,30 @@
 
   <section>
     <h2>Iterations</h2>
+    <p class="takeaway">Three rounds, each fixing what the last got wrong: what → why → can I trust it.</p>
 
     <h3>Iteration one: metrics first</h3>
-    <p>The dashboard led with metric cards showing how today compared with goal, and suggested actions sat below. GMs could see what was off, but they still asked, <q>So what do I do?</q></p>
+    <p class="takeaway sub">Actions and metrics sat side by side, with nothing connecting them.</p>
+    <p>Suggested actions were ranked by severity, meaning how far each metric was from its goal. But nothing linked an action to the metric behind it. <q>Open a second register</q> sat next to six metric cards, and GMs had to figure out which number it was responding to. So they went back to the metrics to work it out themselves, the same cross-referencing SPARK was supposed to end.</p>
     <figure class="slide">
       <img src="/work/media/spark/iteration-one.png" width="1600" height="1164" loading="lazy" decoding="async" onerror="this.remove()"
         alt="Iteration one: a dashboard led by metric cards comparing today's hospitality numbers with goal, with suggested actions below them.">
       <figcaption class="ph" aria-hidden="true"><b>iteration-one.png</b>Figma slide 1:1670 (Iteration one)</figcaption>
     </figure>
 
-    <h3>Iteration two: actions first</h3>
-    <p>I flipped the hierarchy. Recommended actions moved to the top, ranked by impact on guests, and each one came with its reason. For example: <q>Open a second register until 1:30 PM. Wait time is 6:40, 33% over goal, and the line is still growing.</q> GMs no longer had to cross-reference metrics to understand why.</p>
+    <h3>Iteration two: actions with context</h3>
+    <p class="takeaway sub">Each action now has two parts: the recommendation, and the driver behind it.</p>
+    <p>The recommendation says what to do: <q>Open a second register until 1:30 PM.</q> The driver explains why, using live data: <q>Wait time is 6:40, 33% over goal, and the line is still growing.</q> With the reason built into each action, GMs no longer needed the metrics to decide. So actions moved to the top, and the metrics moved to a secondary position as supporting evidence.</p>
     <figure class="slide">
       <img src="/work/media/spark/iteration-two.png" width="1600" height="1164" loading="lazy" decoding="async" onerror="this.remove()"
-        alt="Iteration two: recommended actions moved to the top, ranked by impact on guests, each with its reason, such as opening a second register until 1:30 PM because wait time is 33% over goal.">
+        alt="Iteration two: recommended actions moved to the top, each with its reason, such as opening a second register until 1:30 PM because wait time is 33% over goal.">
       <figcaption class="ph" aria-hidden="true"><b>iteration-two.png</b>Figma slide 1:1706 (Iteration two)</figcaption>
     </figure>
 
     <h3>Iteration three: show the source (selected)</h3>
-    <p>Each action now names where its data comes from, such as Snowflake or Harri. Seeing the source gave GMs enough trust in a recommendation to act on it.</p>
-    <figure class="slide">
+    <p class="takeaway sub">GMs won’t act on AI they can’t check, so every action names its source.</p>
+    <p>Even with a reason attached, GMs hesitated. They’re accountable for every shift, and before SPARK they’d always pulled the numbers themselves. So each action now shows where its data comes from, like Snowflake or Harri, the tools they already trusted. A familiar source gave them the confidence to act.</p>
+    <figure class="slide iter"><!-- Iteration three: Figma slide 1:1713, shown as the Spark walkthrough video -->
       <video data-src="/work/media/shake-shack/spark.mp4" poster="/work/media/shake-shack/spark-poster.jpg" width="1920" height="1200"
         data-lazy preload="none" muted loop playsinline aria-label="Iteration three, the selected design: each recommended action names the source of its data, such as Snowflake or Harri"></video>
     </figure>
@@ -201,16 +224,18 @@
 
   <section>
     <h2>Results</h2>
+    <p class="takeaway">In a 1-month pilot across 10 restaurants, GMs acted in seconds, and every one of them wanted to keep SPARK.</p>
     <ul>
       <li><span class="k">20 minutes → seconds</span> from insight to action</li>
-      <li><span class="k">65%</span> of suggested actions accepted</li>
-      <li><span class="k">10 of 10</span> GMs wanted to keep using SPARK</li>
+      <li><span class="k">65%</span> of suggested actions accepted. GMs followed SPARK’s recommendation about two out of three times.</li>
+      <li><span class="k">10 of 10</span> GMs wanted to keep using SPARK after the pilot</li>
     </ul>
   </section>
 
   <section>
     <h2>Reflection</h2>
-    <p><span class="k">People act on AI they can verify.</span> The biggest jump didn’t come from smarter recommendations. It came from showing GMs where each recommendation came from.</p>
+    <p class="takeaway">People act on AI they can verify.</p>
+    <p>When AI makes a recommendation, it has to show where the data comes from. A clear source is what turns a suggestion into something people trust enough to act on. It’s how I now approach every AI product I design.</p>
   </section>
 </main>
 
